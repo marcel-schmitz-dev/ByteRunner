@@ -5,7 +5,7 @@ export class Character extends MovableObject {
     width = 100;
     height = 130;
     y = 300;
-    speed = 8;
+    speed = 5;
 
     imageHub = new ImageHub();
     currentImage = 0;
@@ -21,18 +21,31 @@ export class Character extends MovableObject {
 
     animate() {
         setInterval(() => {
-            if (this.world && this.world.keyboard.RIGHT) {
+            if (this.world && this.world.keyboard.RIGHT&&
+                this.x > 0 &&
+                this.x < this.world.level.level_end_x ) {
                 this.x += this.speed;
                 this.otherDirection = false;
+            }
 
-                let i = this.currentImage % this.imageHub.images_walking.length;
-                let path = this.imageHub.images_walking[i];
-                this.img = this.imageCache[path];
-                this.currentImage++;
-            } else if (this.world && this.world.keyboard.LEFT) {
+            if (
+                this.world &&
+                this.world.keyboard.LEFT 
+            ) {
                 this.x -= this.speed;
                 this.otherDirection = true;
+            }
 
+            if (this.world) {
+                this.world.camera_x = -this.x + 100;
+            }
+        }, 1000 / 60);
+
+        setInterval(() => {
+            if (
+                this.world &&
+                (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)
+            ) {
                 let i = this.currentImage % this.imageHub.images_walking.length;
                 let path = this.imageHub.images_walking[i];
                 this.img = this.imageCache[path];

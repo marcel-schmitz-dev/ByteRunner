@@ -1,24 +1,23 @@
 import { MovableObject } from "./movable-objects.class.js";
 import { ImageHub } from "./image.hub.js";
 
-export class Boss extends MovableObject {
-    height = 200;
-    width = 150;
-
-    speed = 3;
+export class Endboss extends MovableObject {
+    height = 350;
+    width = 300;
+    speed = 1.5;
 
     imageHub = new ImageHub();
     currentImage = 0;
 
-    constructor() {
+    constructor(startX) {
         super();
         this.loadImage("assets/img/boss/bossTransformation5.png");
         this.loadImages(this.imageHub.images_boss_walk);
-        this.animate();
 
-        this.x = 400 + Math.random() * 800;
-        this.speed = 0.15 + Math.random() * 0.25;
-        this.y = 235;
+        this.x = startX !== undefined ? startX : 2700;
+        this.y = 80;
+
+        this.animate();
     }
 
     animate() {
@@ -34,7 +33,7 @@ export class Boss extends MovableObject {
 
     moveLeft() {
         setInterval(() => {
-            this.x -= 0.15;
+            this.x -= this.speed;
         }, 1000 / 60);
     }
 }

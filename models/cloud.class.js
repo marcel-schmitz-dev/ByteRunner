@@ -4,11 +4,12 @@ export class Cloud extends MovableObject {
     width = 300;
     height = 200;
 
-    constructor() {
+    constructor(startX) {
         super();
         this.loadImage("assets/img/cloud/cloud.webp");
 
-        this.x = Math.random() * 500;
+        // Nutze den übergebenen Wert oder fallback auf Zufall, falls leer
+        this.x = startX !== undefined ? startX : Math.random() * 2500;
         this.y = 50;
 
         this.animate();
@@ -18,7 +19,7 @@ export class Cloud extends MovableObject {
         this.moveLeft();
     }
 
-    moveLeft(){
+    moveLeft() {
         setInterval(() => {
             this.x -= 0.15;
         }, 1000 / 60);

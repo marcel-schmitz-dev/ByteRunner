@@ -1,35 +1,19 @@
 import { BackgroundObject } from "./background-object.class.js";
 import { Character } from "./character.class.js";
+import { level1 } from "../levels/level1.js";
+import { Level } from "../models/level.class.js";
 import { HardDrive } from "./hard-drive.class.js";
 import { MouseDrone } from "./mouse-drone.class.js";
-import { Boss } from "./boss.class.js";
+import { Endboss } from "./endboss.class.js";
 import { Cloud } from "./cloud.class.js";
 import { Keyboard } from "./keyboard.class.js";
 
 export class World {
     character;
     keyboard;
-
-    enemies = [
-        new MouseDrone(),
-        new MouseDrone(),
-        new MouseDrone(),
-        new MouseDrone(),
-        new MouseDrone(),
-        new HardDrive(),
-        new HardDrive(),
-        new HardDrive(),
-        new HardDrive(),
-        new HardDrive(),
-        new Boss(),
-    ];
-
-    backgroundObjects = [
-        new BackgroundObject("assets/img/background/background.webp", 0, 0),
-    ];
-    clouds = [new Cloud(), new Cloud()];
+    level = level1;
     canvas;
-    ctx;
+    camera_x = 0;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext("2d");
@@ -44,13 +28,15 @@ export class World {
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.addObjectsToMap(this.backgroundObjects);
+        this.ctx.translate(this.camera_x, 0);
 
-        this.addObjectsToMap(this.clouds);
+        this.addObjectsToMap(this.level.backgroundObjects);
 
+        this.addObjectsToMap(this.level.clouds);
         this.addToMap(this.character);
+        this.addObjectsToMap(this.level.enemies);
 
-        this.addObjectsToMap(this.enemies);
+        this.ctx.translate(-this.camera_x, 0);
 
         let self = this;
         requestAnimationFrame(function () {
