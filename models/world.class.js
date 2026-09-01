@@ -4,9 +4,12 @@ import { HardDrive } from "./hard-drive.class.js";
 import { MouseDrone } from "./mouse-drone.class.js";
 import { Boss } from "./boss.class.js";
 import { Cloud } from "./cloud.class.js";
+import { Keyboard } from "./keyboard.class.js";
 
 export class World {
-    character = new Character();
+    character;
+    keyboard;
+
     enemies = [
         new MouseDrone(),
         new MouseDrone(),
@@ -28,25 +31,25 @@ export class World {
     canvas;
     ctx;
 
-    constructor(canvas) {
+    constructor(canvas, keyboard) {
         this.ctx = canvas.getContext("2d");
         this.canvas = canvas;
+        this.keyboard = keyboard;
+
+        this.character = new Character(this);
+
         this.draw();
     }
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // 1. Hintergrund zuerst, damit er ganz hinten liegt
         this.addObjectsToMap(this.backgroundObjects);
 
-        // 2. Wolken
         this.addObjectsToMap(this.clouds);
 
-        // 3. Charakter kommt über den Hintergrund
         this.addToMap(this.character);
 
-        // 4. Gegner zum Schluss
         this.addObjectsToMap(this.enemies);
 
         let self = this;
@@ -62,6 +65,19 @@ export class World {
     }
 
     addToMap(mo) {
-        this.ctx.drawImage(mo.img, mo.x, mo.y, mo.width, mo.height);
+        if (mo.otherDirection) {
+            this.ctx.save();
+            this.ctx.scale(-1, 1);
+            this.ctx.drawImage(
+                mo.img,
+                -mo.x - mo.width,
+                mo.y,
+                mo.width,
+                mo.height,
+            );
+            this.ctx.restore();
+        } else {
+            this.ctx.drawImage(mo.img, mo.x, mo.y, mo.width, mo.height);
+        }
     }
 }

@@ -29,10 +29,10 @@ export class Boss extends MovableObject {
             let path = this.imageHub.images_boss_walk[i];
             this.img = this.imageCache[path];
             this.currentImage++;
-        }, 1000 / 12);
+        }, 1000 / 10);
     }
 
-    moveLeft(){
+    moveLeft() {
         setInterval(() => {
             this.x -= 0.15;
         }, 1000 / 60);
