@@ -1,4 +1,5 @@
 body {
+    background-color: grey;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -9,4 +10,9 @@ canvas {
     background-image: url("./assets/img/background/background.webp");
     background-size: contain;
     background-size: 100% 100%;
+}
+
+h1,
+p {
+    color: aqua;
 }

@@ -2,6 +2,7 @@ import { Character } from "./character.class.js";
 import { HardDrive } from "./hard-drive.class.js";
 import { MouseDrone } from "./mouse-drone.class.js";
 import { Boss } from "./boss.class.js";
+import { Cloud } from "./cloud.class.js";
 
 export class World {
     character = new Character();
@@ -19,6 +20,7 @@ export class World {
         new Boss(),
     ];
 
+    clouds = [new Cloud(), new Cloud()];
     canvas;
     ctx;
 
@@ -45,6 +47,16 @@ export class World {
                 enemy.y,
                 enemy.height,
                 enemy.width,
+            );
+        });
+
+        this.clouds.forEach((cloud) => {
+            this.ctx.drawImage(
+                cloud.img,
+                cloud.x,
+                cloud.y,
+                cloud.height,
+                cloud.width,
             );
         });
 
