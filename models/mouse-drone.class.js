@@ -10,7 +10,7 @@ export class MouseDrone extends MovableObject {
 
     constructor() {
         super();
-        this.loadImage("assets/img/monster/mouseDrone0.png");
+        this.loadImage("assets/img/monster/mouseDrone0.webp");
         this.loadImages(this.imageHub.images_mouse_drone);
         this.animate();
 

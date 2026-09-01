@@ -12,7 +12,7 @@ export class HardDrive extends MovableObject {
 
     constructor() {
         super();
-        this.loadImage("assets/img/monster/hardDrive0.png");
+        this.loadImage("assets/img/monster/hardDrive0.webp");
         this.loadImages(this.imageHub.images_hard_drive);
         this.animate();
 
@@ -29,10 +29,10 @@ export class HardDrive extends MovableObject {
             let path = this.imageHub.images_hard_drive[i];
             this.img = this.imageCache[path];
             this.currentImage++;
-        }, 1000 / 12);
+        }, 1000 / 10);
     }
 
-    moveLeft(){
+    moveLeft() {
         setInterval(() => {
             this.x -= 0.15;
         }, 1000 / 60);
