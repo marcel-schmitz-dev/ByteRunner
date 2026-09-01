@@ -1,3 +1,4 @@
+import { BackgroundObject } from "./background-object.class.js";
 import { Character } from "./character.class.js";
 import { HardDrive } from "./hard-drive.class.js";
 import { MouseDrone } from "./mouse-drone.class.js";
@@ -20,6 +21,9 @@ export class World {
         new Boss(),
     ];
 
+    backgroundObjects = [
+        new BackgroundObject("assets/img/background/background.webp", 0, 0),
+    ];
     clouds = [new Cloud(), new Cloud()];
     canvas;
     ctx;
@@ -33,36 +37,31 @@ export class World {
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.ctx.drawImage(
-            this.character.img,
-            this.character.x,
-            this.character.y,
-            this.character.height,
-            this.character.width,
-        );
-        this.enemies.forEach((enemy) => {
-            this.ctx.drawImage(
-                enemy.img,
-                enemy.x,
-                enemy.y,
-                enemy.height,
-                enemy.width,
-            );
-        });
+        // 1. Hintergrund zuerst, damit er ganz hinten liegt
+        this.addObjectsToMap(this.backgroundObjects);
 
-        this.clouds.forEach((cloud) => {
-            this.ctx.drawImage(
-                cloud.img,
-                cloud.x,
-                cloud.y,
-                cloud.height,
-                cloud.width,
-            );
-        });
+        // 2. Wolken
+        this.addObjectsToMap(this.clouds);
+
+        // 3. Charakter kommt über den Hintergrund
+        this.addToMap(this.character);
+
+        // 4. Gegner zum Schluss
+        this.addObjectsToMap(this.enemies);
 
         let self = this;
         requestAnimationFrame(function () {
             self.draw();
         });
+    }
+
+    addObjectsToMap(objects) {
+        objects.forEach((objekt) => {
+            this.addToMap(objekt);
+        });
+    }
+
+    addToMap(mo) {
+        this.ctx.drawImage(mo.img, mo.x, mo.y, mo.width, mo.height);
     }
 }

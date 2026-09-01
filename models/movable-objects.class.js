@@ -2,8 +2,8 @@ export class MovableObject {
     x = 120;
     y = 300;
     img;
-    height = 80;
-    width = 130;
+    height = 130;
+    width = 100;
     loadImage(path) {
         this.img = new Image();
         this.img.src = path;

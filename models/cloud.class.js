@@ -1,9 +1,9 @@
 import { MovableObject } from "./movable-objects.class.js";
 
 export class Cloud extends MovableObject {
-    width = 200;
-    height = 300;
-    
+    width = 300;
+    height = 200;
+
     constructor() {
         super();
         this.loadImage("assets/img/cloud/cloud.webp");

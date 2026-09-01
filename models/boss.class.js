@@ -1,9 +1,9 @@
 import { MovableObject } from "./movable-objects.class.js";
 
 export class Boss extends MovableObject {
-    height = 120;
-    width = 200;
-    
+    height = 200;
+    width = 150;
+
     constructor() {
         super();
         this.loadImage("assets/img/boss/bossTransformation5.png");
