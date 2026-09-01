@@ -1,10 +1,10 @@
-import { MovableObject } from './movable-objects.class.js';
+import { MovableObject } from "./movable-objects.class.js";
 
-export class HardDrive extends MovableObject{
-
+export class HardDrive extends MovableObject {
     constructor() {
-        super().loadImage("assets/img/monster/hardDrive0.png");
-        
+        super();
+        this.loadImage("assets/img/monster/hardDrive0.png");
+
+        this.x = 200 + Math.random() * 500;
     }
-    
 }

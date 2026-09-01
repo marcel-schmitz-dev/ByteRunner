@@ -2,6 +2,7 @@ import { MovableObject } from "./movable-objects.class.js";
 
 export class Boss extends MovableObject {
     constructor() {
-        super().loadImage("assets/img/character/walk/stehen.webp");
+        super();
+        this.loadImage("assets/img/boss/bossTransformation5.png");
     }
 }

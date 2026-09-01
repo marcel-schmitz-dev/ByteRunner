@@ -5,13 +5,18 @@ import { MouseDrone } from "../models/mouse-drone.class.js";
 import { Boss } from "../models/boss.class.js";
 
 let canvas;
-let ctx;
-
-let world = new World();
+let world;
 
 function init() {
     canvas = document.getElementById("canvas");
-    ctx = canvas.getContext("2d");
+
+    if (!canvas) {
+        console.error("Canvas element not found!");
+        return;
+    }
+
+    world = new World(canvas);
+    window.world = world;
 }
 
 init();
