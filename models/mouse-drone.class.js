@@ -14,7 +14,7 @@ export class MouseDrone extends MovableObject {
         this.loadImages(this.imageHub.images_mouse_drone);
         this.animate();
 
-        this.x = 450 + Math.random() * 800;
+        this.x = 450 + Math.random() * 2000;
         this.speed = 0.15 + Math.random() * 0.25;
         this.y = 380;
     }

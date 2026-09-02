@@ -1,10 +1,9 @@
 import { Character } from "./character.class.js";
 import { level1 } from "../levels/level1.js";
 import { StatusBar } from "./status-bar.class.js";
-import { CoinBar } from "./coin-bar.class.js";
-import { DiscBar } from "./disc-bar.class.js";
 import { BossHpBar } from "./boss-hp-bar.class.js";
 import { ThrowableObject } from "./throwable-object.class.js";
+import { ImageHub } from "./image.hub.js";
 
 export class World {
     character;
@@ -12,9 +11,22 @@ export class World {
     level = level1;
     canvas;
     camera_x = 0;
-    statusBar = new StatusBar();
-    coinBar = new CoinBar();
-    discBar = new DiscBar();
+    imageHub = new ImageHub();
+    statusBar = new StatusBar(this.imageHub.images_hp, 100, 15, 200, 50);
+    coinBar = new StatusBar(
+        this.imageHub.images_coin || this.imageHub.images_coins,
+        0,
+        75,
+        160,
+        50,
+    );
+    discBar = new StatusBar(
+        this.imageHub.images_disc || this.imageHub.images_discs,
+        0,
+        135,
+        160,
+        50,
+    );
     bossHpBar = new BossHpBar();
     bossSpawned = false;
     throwableObjects = [];
@@ -28,12 +40,16 @@ export class World {
         this.draw();
         this.run();
         this.checkThrowObjects();
+
+        this.coinBar.setPercentage(0, "0");
+        this.discBar.setPercentage(0, "0");
     }
 
     run() {
         setInterval(() => {
             this.checkCollisions();
             this.checkBossAwakening();
+            this.checkCollectibles();
 
             this.level.enemies.forEach((enemy) => {
                 if (enemy.constructor.name === "Endboss") {
@@ -53,6 +69,36 @@ export class World {
                 }
             }
         });
+    }
+
+    checkCollectibles() {
+        if (this.level.coins) {
+            this.level.coins.forEach((coin, index) => {
+                if (this.character.isColliding(coin)) {
+                    this.character.coins = (this.character.coins || 0) + 1;
+                    if (this.character.coins > 10) this.character.coins = 10;
+                    
+                    let coinPercentage = this.character.coins * 10;
+                    this.coinBar.setPercentage(coinPercentage, `${this.character.coins}`);
+                    
+                    this.level.coins.splice(index, 1);
+                }
+            });
+        }
+
+        if (this.level.collectibleDiscs) {
+            this.level.collectibleDiscs.forEach((discItem, index) => {
+                if (this.character.isColliding(discItem)) {
+                    this.character.discs = (this.character.discs || 0) + 1;
+                    if (this.character.discs > 10) this.character.discs = 10;
+                    
+                    let discPercentage = this.character.discs * 20;
+                    this.discBar.setPercentage(discPercentage, `${this.character.discs}`);
+                    
+                    this.level.collectibleDiscs.splice(index, 1);
+                }
+            });
+        }
     }
 
     checkThrowObjects() {
@@ -128,7 +174,7 @@ export class World {
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.translate(this.camera_x, 0);
+        this.ctx.translate(this.camera_x, 0); // Kamera-Verschiebung beginnt
 
         this.addObjectsToMap(this.level.backgroundObjects);
 
@@ -140,8 +186,17 @@ export class World {
             this.canvas.height,
         );
 
-        this.ctx.translate(-this.camera_x, 0);
+        // --- WELT-OBJEKTE (bewegen sich mit der Kamera) ---
+        this.addObjectsToMap(this.level.clouds);
+        this.addObjectsToMap(this.level.coins);                  // Hierher verschoben!
+        this.addObjectsToMap(this.level.collectibleDiscs);       // Hierher verschoben!
+        this.addObjectsToMap(this.level.enemies);
+        this.addObjectsToMap(this.throwableObjects);
+        this.addToMap(this.character);
 
+        this.ctx.translate(-this.camera_x, 0); // Kamera-Verschiebung für die Welt aufheben
+
+        // --- HUD / UI-ELEMENTE (bleiben fest an Ort und Stelle auf dem Bildschirm) ---
         this.addToMap(this.statusBar);
         this.addToMap(this.coinBar);
         this.addToMap(this.discBar);
@@ -149,15 +204,6 @@ export class World {
         if (this.bossSpawned) {
             this.addToMap(this.bossHpBar);
         }
-
-        this.ctx.translate(this.camera_x, 0);
-
-        this.addObjectsToMap(this.level.clouds);
-        this.addToMap(this.character);
-        this.addObjectsToMap(this.level.enemies);
-        this.addObjectsToMap(this.throwableObjects);
-
-        this.ctx.translate(-this.camera_x, 0);
 
         let self = this;
         requestAnimationFrame(function () {

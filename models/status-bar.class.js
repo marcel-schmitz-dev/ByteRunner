@@ -4,36 +4,46 @@ import { ImageHub } from "./image.hub.js";
 export class StatusBar extends DrawableObject {
     imageHub = new ImageHub();
     percentage = 100;
+    imageArray;
+    text = "";
 
-    constructor() {
+    constructor(imageArray, initialPercentage = 100, yPosition = 0, width = 150, height = 40) {
         super();
-        this.loadImages(this.imageHub.images_hp);
+        this.imageArray = imageArray && imageArray.length > 0 ? imageArray : this.imageHub.images_hp;
+        this.loadImages(this.imageArray);
         this.x = 20;
-        this.y = 0;
-        this.width = 200;
-        this.height = 60;
-        this.setPercentage(100);
+        this.y = yPosition;
+        this.width = width;
+        this.height = height;
+        this.setPercentage(initialPercentage);
     }
 
-    setPercentage(percentage) {
+    setPercentage(percentage, text = "") {
         this.percentage = percentage;
-        let imagePath = this.imageHub.images_hp[this.resolveImageIndex()];
-        this.img = this.imageCache[imagePath];
+        this.text = text;
+        let imagePath = this.imageArray[this.resolveImageIndex()];
+        if (this.imageCache && this.imageCache[imagePath]) {
+            this.img = this.imageCache[imagePath];
+        }
+    }
+
+    draw(ctx) {
+        super.draw(ctx);
+
+        if (this.text !== "") {
+            ctx.font = "20px 'Courier New', monospace";
+            ctx.fillStyle = "white";
+            ctx.textAlign = "left";
+            ctx.fillText(this.text, this.x + 75, this.y + (this.height / 1.6));
+        }
     }
 
     resolveImageIndex() {
-        if (this.percentage == 100) {
-            return 5;
-        } else if (this.percentage > 80) {
-            return 4;
-        } else if (this.percentage > 60) {
-            return 3;
-        } else if (this.percentage > 40) {
-            return 2;
-        } else if (this.percentage > 20) {
-            return 1;
-        } else {
-            return 0;
-        }
+        if (this.percentage >= 100) return 5;
+        if (this.percentage >= 80) return 4;
+        if (this.percentage >= 60) return 3;
+        if (this.percentage >= 40) return 2;
+        if (this.percentage >= 20) return 1;
+        return 0;
     }
 }

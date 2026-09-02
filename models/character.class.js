@@ -6,6 +6,8 @@ export class Character extends MovableObject {
     height = 130;
     y = 300;
     speed = 5;
+    coins = 0;
+    discs = 0;
 
     imageHub = new ImageHub();
     currentImage = 0;

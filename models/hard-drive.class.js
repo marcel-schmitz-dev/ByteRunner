@@ -16,7 +16,7 @@ export class HardDrive extends MovableObject {
         this.loadImages(this.imageHub.images_hard_drive);
         this.animate();
 
-        this.x = 400 + Math.random() * 800;
+        this.x = 500 + Math.random() * 2000;
         this.speed = 0.15 + Math.random() * 0.25;
         this.y = 350;
     }
