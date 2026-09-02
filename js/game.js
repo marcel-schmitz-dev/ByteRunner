@@ -35,4 +35,18 @@ window.addEventListener("keyup", (e) => {
     if (e.code == "KeyL") keyboard.THROW = false;
 });
 
-init();
+// Global machen für das HTML (onclick)
+window.toggleModal = function (modalId) {
+    let modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.toggle("hidden");
+    }
+};
+
+window.startGame = function () {
+    let startScreen = document.getElementById("start-screen");
+    if (startScreen) {
+        startScreen.style.display = "none";
+    }
+    init(); // Startet das Spiel erst jetzt beim Klick!
+};

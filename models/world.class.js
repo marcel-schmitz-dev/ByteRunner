@@ -15,6 +15,7 @@ export class World {
     coinBar = new CoinBar();
     discBar = new DiscBar();
     throwableObjects = [];
+    lastThrowTime = 0;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext("2d");
@@ -29,30 +30,8 @@ export class World {
     run() {
         setInterval(() => {
             this.checkCollisions();
-            this.checkThrowObjects();
         }, 200);
     }
-
-    checkThrowObjects() {
-        if (this.keyboard.THROW) {
-            let disc = new ThrowableObject(
-                this.character.x + 100,
-                this.character.y + 100,
-            );
-            this.throwableObjects.push(disc);
-        }
-    }
-
-    checkCollisions() {
-        this.level.enemies.forEach((enemy) => {
-            if (this.character.isColliding(enemy)) {
-                this.character.hit();
-                this.statusBar.setPercentage(this.character.energy);
-            }
-        });
-    }
-
-    lastThrowTime = 0;
 
     checkThrowObjects() {
         setInterval(() => {
@@ -68,11 +47,29 @@ export class World {
         }, 100);
     }
 
+    checkCollisions() {
+        this.level.enemies.forEach((enemy) => {
+            if (this.character.isColliding(enemy)) {
+                this.character.hit();
+                this.statusBar.setPercentage(this.character.energy);
+            }
+        });
+    }
+
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.translate(this.camera_x, 0);
 
+
         this.addObjectsToMap(this.level.backgroundObjects);
+
+        this.ctx.fillStyle = "rgba(10, 10, 20, 0.4)";
+        this.ctx.fillRect(
+            -this.camera_x,
+            0,
+            this.canvas.width,
+            this.canvas.height,
+        );
 
         this.ctx.translate(-this.camera_x, 0);
         this.addToMap(this.statusBar);

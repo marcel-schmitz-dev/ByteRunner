@@ -4,6 +4,8 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="./styles/start-screen.css" />
+        <link rel="stylesheet" href="./styles/modal.css" />
 
         <title>Byte Runner</title>
         <link
@@ -15,7 +17,90 @@
     <body>
         <h1>ByteRunner</h1>
 
-        <canvas id="canvas" height="480" width="720"></canvas>
+        <div id="game-container">
+            <canvas
+                id="canvas"
+                height="480"
+                width="720"
+                style="display: block"
+            ></canvas>
+
+            <div id="start-screen" class="start-screen">
+                <div class="menu-content">
+                    <h1 class="game-title">ByteRunner</h1>
+
+                    <div class="menu-buttons">
+                        <button class="btn" onclick="startGame()">
+                            Spiel Starten
+                        </button>
+                        <button
+                            class="btn"
+                            onclick="toggleModal('controls-modal')"
+                        >
+                            Steuerung
+                        </button>
+                        <button
+                            class="btn"
+                            onclick="toggleModal('imprint-modal')"
+                        >
+                            Impressum
+                        </button>
+                    </div>
+                </div>
+
+                <div id="controls-modal" class="modal hidden">
+                    <div class="modal-content">
+                        <h2>Steuerung</h2>
+                        <ul class="controls-list">
+                            <li>
+                                <span>Bewegen Links/Rechts</span>
+                                <span>Pfeiltasten / A, D</span>
+                            </li>
+                            <li>
+                                <span>Springen (Oben)</span>
+                                <span>Pfeil Oben / W</span>
+                            </li>
+                            <li>
+                                <span>Werfen (Disc)</span>
+                                <span>Taste L</span>
+                            </li>
+                        </ul>
+                        <button
+                            class="btn-close"
+                            onclick="toggleModal('controls-modal')"
+                        >
+                            Schließen
+                        </button>
+                    </div>
+                </div>
+
+                <div id="imprint-modal" class="modal hidden">
+                    <div class="modal-content">
+                        <h2>Impressum</h2>
+                        <p>Angaben gemäß § 5 TMG</p>
+                        <p>Marcel Schmitz<br />Entwickler & Inhaber</p>
+                        <p>
+                            <strong>E-Mail:</strong>
+                            <a href="mailto:m.schmitz.dev@gmail.com"
+                                >m.schmitz.dev@gmail.com</a
+                            >
+                        </p>
+                        <p>
+                            <strong>Bild- und Icon-Hinweis:</strong><br />
+                            Alle verwendeten Icons und Grafiken sind
+                            KI-generiert und wurden mit ChatGPT erstellt.
+                        </p>
+                        <p>© 2026 Marcel Schmitz. Alle Rechte vorbehalten.</p>
+                        <button
+                            class="btn-close"
+                            onclick="toggleModal('imprint-modal')"
+                        >
+                            Schließen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <script type="module" src="js/game.js"></script>
     </body>
