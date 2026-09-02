@@ -19,10 +19,19 @@ export class World {
         this.ctx = canvas.getContext("2d");
         this.canvas = canvas;
         this.keyboard = keyboard;
-
         this.character = new Character(this);
-
         this.draw();
+        this.checkCollisions();
+    }
+
+    checkCollisions() {
+        setInterval(() => {
+            this.level.enemies.forEach((enemy) => {
+                if (this.character.isColliding(enemy)) {
+                    console.log("collision with character", enemy);
+                }
+            });
+        }, 200);
     }
 
     draw() {
@@ -63,7 +72,8 @@ export class World {
             );
             this.ctx.restore();
         } else {
-            this.ctx.drawImage(mo.img, mo.x, mo.y, mo.width, mo.height);
+            mo.draw(this.ctx);
+            mo.drawFrame(this.ctx);
         }
     }
 }
