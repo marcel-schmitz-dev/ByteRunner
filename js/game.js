@@ -1,4 +1,5 @@
 import { World } from "../models/world.class.js";
+import { DrawableObject } from "../models/drawable-object.class.js";
 import { Character } from "../models/character.class.js";
 import { HardDrive } from "../models/hard-drive.class.js";
 import { MouseDrone } from "../models/mouse-drone.class.js";

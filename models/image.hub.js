@@ -1,5 +1,19 @@
 export class ImageHub {
     // ==========================================
+    //        STATUS BAR (HUD)
+    // ==========================================
+    images_hp = [
+        "assets/img/hud/hpBar0.webp",
+        "assets/img/hud/hpBar1.webp",
+        "assets/img/hud/hpBar2.webp",
+        "assets/img/hud/hpBar3.webp",
+        "assets/img/hud/hpBar4.webp",
+        "assets/img/hud/hpBar5.webp",
+    ];
+    images_disc = ["assets/img/hud/discBar.webp",];
+    images_coin = ["assets/img/hud/coinBar.webp",];
+
+    // ==========================================
     //        CHARAKTER BILDER (HERO)
     // ==========================================
 
@@ -23,6 +37,11 @@ export class ImageHub {
         "assets/img/character/jump/jump4.webp",
     ];
 
+    images_hurt = [
+        "assets/img/character/dead/dead0.webp",
+        "assets/img/character/dead/dead1.webp",
+    ];
+
     images_dead = [
         "assets/img/character/dead/dead0.webp",
         "assets/img/character/dead/dead1.webp",
@@ -30,8 +49,7 @@ export class ImageHub {
         "assets/img/character/dead/dead3.webp",
         "assets/img/character/dead/dead4.webp",
         "assets/img/character/dead/dead5.webp",
-        
-    ]
+    ];
 
     // ==========================================
     //        GEGNER BILDER (ENEMIES)
@@ -61,9 +79,7 @@ export class ImageHub {
         "assets/img/monster/mouseDrone8.webp",
     ];
 
-    images_boss_transformation = [
-
-    ]
+    images_boss_transformation = [];
     images_boss_walk = [
         "assets/img/boss/bossWalk0.webp",
         "assets/img/boss/bossWalk1.webp",

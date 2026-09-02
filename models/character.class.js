@@ -17,6 +17,7 @@ export class Character extends MovableObject {
         this.loadImage("assets/img/character/walk/stehen.webp");
         this.loadImages(this.imageHub.images_walking);
         this.loadImages(this.imageHub.images_jumping);
+        this.loadImages(this.imageHub.images_hurt);
         this.loadImages(this.imageHub.images_dead);
         this.applyGravity();
         this.animate();
@@ -59,6 +60,11 @@ export class Character extends MovableObject {
                     this.imageHub.images_dead.length - 1,
                 );
                 let path = this.imageHub.images_dead[i];
+                this.img = this.imageCache[path];
+                this.currentImage++;
+            } else if (this.isHurt()) {
+                let i = this.currentImage % this.imageHub.images_hurt.length;
+                let path = this.imageHub.images_hurt[i];
                 this.img = this.imageCache[path];
                 this.currentImage++;
             } else if (this.isAboveGround()) {

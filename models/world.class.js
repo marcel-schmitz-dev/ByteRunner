@@ -1,12 +1,8 @@
-import { BackgroundObject } from "./background-object.class.js";
 import { Character } from "./character.class.js";
 import { level1 } from "../levels/level1.js";
-import { Level } from "../models/level.class.js";
-import { HardDrive } from "./hard-drive.class.js";
-import { MouseDrone } from "./mouse-drone.class.js";
-import { Endboss } from "./endboss.class.js";
-import { Cloud } from "./cloud.class.js";
-import { Keyboard } from "./keyboard.class.js";
+import { StatusBar } from "./status-bar.class.js";
+import { CoinBar } from "./coin-bar.class.js";
+import { DiscBar } from "./disc-bar.class.js";
 
 export class World {
     character;
@@ -14,6 +10,9 @@ export class World {
     level = level1;
     canvas;
     camera_x = 0;
+    statusBar = new StatusBar();
+    coinBar = new CoinBar();
+    discBar = new DiscBar();
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext("2d");
@@ -29,8 +28,7 @@ export class World {
             this.level.enemies.forEach((enemy) => {
                 if (this.character.isColliding(enemy)) {
                     this.character.hit();
-                    console.log("Collsion with Character, enery", this.character.energy);
-                    
+                    this.statusBar.setPercentage(this.character.energy);
                 }
             });
         }, 200);
@@ -38,10 +36,15 @@ export class World {
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
         this.ctx.translate(this.camera_x, 0);
 
         this.addObjectsToMap(this.level.backgroundObjects);
+
+        this.ctx.translate(-this.camera_x, 0);
+        this.addToMap(this.statusBar);
+        this.addToMap(this.coinBar);
+        this.addToMap(this.discBar);
+        this.ctx.translate(this.camera_x, 0);
 
         this.addObjectsToMap(this.level.clouds);
         this.addToMap(this.character);
@@ -75,7 +78,6 @@ export class World {
             this.ctx.restore();
         } else {
             mo.draw(this.ctx);
-            mo.drawFrame(this.ctx);
         }
     }
 }
