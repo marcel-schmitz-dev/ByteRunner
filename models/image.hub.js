@@ -10,8 +10,14 @@ export class ImageHub {
         "assets/img/hud/hpBar4.webp",
         "assets/img/hud/hpBar5.webp",
     ];
-    images_disc = ["assets/img/hud/discBar.webp",];
-    images_coin = ["assets/img/hud/coinBar.webp",];
+    images_disc = ["assets/img/hud/discBar.webp"];
+    images_coinbar = ["assets/img/hud/coinBar.webp"];
+    images_coin = [
+        "assets/img/coin/coin0.webp",
+        "assets/img/coin/coin1.webp",
+        "assets/img/coin/coin2.webp",
+        "assets/img/coin/coin3.webp",
+    ];
 
     // ==========================================
     //        CHARAKTER BILDER (HERO)
@@ -80,13 +86,13 @@ export class ImageHub {
     ];
 
     images_boss_hp = [
-    "assets/img/hud/boss_hp_bar0.webp",
-    "assets/img/hud/boss_hp_bar1.webp",
-    "assets/img/hud/boss_hp_bar2.webp",
-    "assets/img/hud/boss_hp_bar3.webp",
-    "assets/img/hud/boss_hp_bar4.webp",
-    "assets/img/hud/boss_hp_bar5.webp",
-];
+        "assets/img/hud/boss_hp_bar0.webp",
+        "assets/img/hud/boss_hp_bar1.webp",
+        "assets/img/hud/boss_hp_bar2.webp",
+        "assets/img/hud/boss_hp_bar3.webp",
+        "assets/img/hud/boss_hp_bar4.webp",
+        "assets/img/hud/boss_hp_bar5.webp",
+    ];
 
     images_boss_transformation = [
         "assets/img/boss/bossTransformation0.webp",

@@ -5,6 +5,8 @@ import { HardDrive } from "../models/hard-drive.class.js";
 import { Endboss } from "../models/endboss.class.js";
 import { Cloud } from "../models/cloud.class.js";
 import { MovableObject } from "../models/movable-objects.class.js";
+import { DrawableObject } from "../models/drawable-object.class.js";
+import { ImageHub } from "../models/image.hub.js";
 
 class CollectibleDisc extends MovableObject {
     height = 40;
@@ -18,15 +20,28 @@ class CollectibleDisc extends MovableObject {
     }
 }
 
-class CoinItem extends MovableObject {
+export class Coin extends DrawableObject {
+    imageHub = new ImageHub();
     height = 40;
     width = 40;
 
     constructor(x, y) {
         super();
         this.loadImage("assets/img/coin/coin0.webp");
+        this.loadImages(this.imageHub.images_coin);
+        
         this.x = x;
         this.y = y;
+        this.animate();
+    }
+
+    animate() {
+        setInterval(() => {
+            let i = this.currentImage % this.imageHub.images_coin.length;
+            let path = this.imageHub.images_coin[i];
+            this.img = this.imageCache[path];
+            this.currentImage++;
+        }, 200);
     }
 }
 
@@ -61,16 +76,16 @@ export const level1 = new Level(
         new Cloud(2500),
     ],
     [
-        new CoinItem(250, 340),
-        new CoinItem(500, 300),
-        new CoinItem(750, 350),
-        new CoinItem(1000, 300),
-        new CoinItem(1250, 340),
-        new CoinItem(1500, 300),
-        new CoinItem(1750, 350),
-        new CoinItem(2000, 300),
-        new CoinItem(2200, 340),
-        new CoinItem(2400, 300),
+        new Coin(250, 340),
+        new Coin(500, 300),
+        new Coin(750, 350),
+        new Coin(1000, 300),
+        new Coin(1250, 340),
+        new Coin(1500, 300),
+        new Coin(1750, 350),
+        new Coin(2000, 300),
+        new Coin(2200, 340),
+        new Coin(2400, 300),
     ],
     [
         new CollectibleDisc(350, 340),

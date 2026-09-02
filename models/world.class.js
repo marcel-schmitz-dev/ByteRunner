@@ -13,13 +13,7 @@ export class World {
     camera_x = 0;
     imageHub = new ImageHub();
     statusBar = new StatusBar(this.imageHub.images_hp, 100, 15, 200, 50);
-    coinBar = new StatusBar(
-        this.imageHub.images_coin || this.imageHub.images_coins,
-        0,
-        75,
-        160,
-        50,
-    );
+    coinBar = new StatusBar(this.imageHub.images_coinbar, 0, 75, 160, 50);
     discBar = new StatusBar(
         this.imageHub.images_disc || this.imageHub.images_discs,
         0,
@@ -77,10 +71,13 @@ export class World {
                 if (this.character.isColliding(coin)) {
                     this.character.coins = (this.character.coins || 0) + 1;
                     if (this.character.coins > 10) this.character.coins = 10;
-                    
+
                     let coinPercentage = this.character.coins * 10;
-                    this.coinBar.setPercentage(coinPercentage, `${this.character.coins}`);
-                    
+                    this.coinBar.setPercentage(
+                        coinPercentage,
+                        `${this.character.coins}`,
+                    );
+
                     this.level.coins.splice(index, 1);
                 }
             });
@@ -91,10 +88,13 @@ export class World {
                 if (this.character.isColliding(discItem)) {
                     this.character.discs = (this.character.discs || 0) + 1;
                     if (this.character.discs > 10) this.character.discs = 10;
-                    
+
                     let discPercentage = this.character.discs * 20;
-                    this.discBar.setPercentage(discPercentage, `${this.character.discs}`);
-                    
+                    this.discBar.setPercentage(
+                        discPercentage,
+                        `${this.character.discs}`,
+                    );
+
                     this.level.collectibleDiscs.splice(index, 1);
                 }
             });
@@ -105,16 +105,23 @@ export class World {
         setInterval(() => {
             let currentTime = new Date().getTime();
             if (this.keyboard.THROW && currentTime - this.lastThrowTime > 500) {
-                let discX = this.character.otherDirection
-                    ? this.character.x - 10
-                    : this.character.x + 50;
-                let disc = new ThrowableObject(
-                    discX,
-                    this.character.y + 50,
-                    this.character.otherDirection,
-                );
-                this.throwableObjects.push(disc);
-                this.lastThrowTime = currentTime;
+                if (this.character.discs && this.character.discs > 0) {
+                    this.character.discs--;
+
+                    let discPercentage = this.character.discs * 10;
+                    this.discBar.setPercentage(discPercentage, `${this.character.discs}`);
+
+                    let discX = this.character.otherDirection
+                        ? this.character.x - 10
+                        : this.character.x + 50;
+                    let disc = new ThrowableObject(
+                        discX,
+                        this.character.y + 50,
+                        this.character.otherDirection,
+                    );
+                    this.throwableObjects.push(disc);
+                    this.lastThrowTime = currentTime;
+                }
             }
         }, 100);
     }
@@ -174,7 +181,7 @@ export class World {
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.translate(this.camera_x, 0); // Kamera-Verschiebung beginnt
+        this.ctx.translate(this.camera_x, 0);
 
         this.addObjectsToMap(this.level.backgroundObjects);
 
@@ -186,17 +193,15 @@ export class World {
             this.canvas.height,
         );
 
-        // --- WELT-OBJEKTE (bewegen sich mit der Kamera) ---
         this.addObjectsToMap(this.level.clouds);
-        this.addObjectsToMap(this.level.coins);                  // Hierher verschoben!
-        this.addObjectsToMap(this.level.collectibleDiscs);       // Hierher verschoben!
+        this.addObjectsToMap(this.level.coins); 
+        this.addObjectsToMap(this.level.collectibleDiscs);
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.throwableObjects);
         this.addToMap(this.character);
 
-        this.ctx.translate(-this.camera_x, 0); // Kamera-Verschiebung für die Welt aufheben
+        this.ctx.translate(-this.camera_x, 0);
 
-        // --- HUD / UI-ELEMENTE (bleiben fest an Ort und Stelle auf dem Bildschirm) ---
         this.addToMap(this.statusBar);
         this.addToMap(this.coinBar);
         this.addToMap(this.discBar);

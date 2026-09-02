@@ -7,9 +7,18 @@ export class StatusBar extends DrawableObject {
     imageArray;
     text = "";
 
-    constructor(imageArray, initialPercentage = 100, yPosition = 0, width = 150, height = 40) {
+    constructor(
+        imageArray,
+        initialPercentage = 100,
+        yPosition = 0,
+        width = 150,
+        height = 40,
+    ) {
         super();
-        this.imageArray = imageArray && imageArray.length > 0 ? imageArray : this.imageHub.images_hp;
+        this.imageArray =
+            imageArray && imageArray.length > 0
+                ? imageArray
+                : this.imageHub.images_hp;
         this.loadImages(this.imageArray);
         this.x = 20;
         this.y = yPosition;
@@ -21,7 +30,14 @@ export class StatusBar extends DrawableObject {
     setPercentage(percentage, text = "") {
         this.percentage = percentage;
         this.text = text;
-        let imagePath = this.imageArray[this.resolveImageIndex()];
+
+        let imagePath;
+        if (this.imageArray.length === 1) {
+            imagePath = this.imageArray[0];
+        } else {
+            imagePath = this.imageArray[this.resolveImageIndex()];
+        }
+
         if (this.imageCache && this.imageCache[imagePath]) {
             this.img = this.imageCache[imagePath];
         }
@@ -31,10 +47,14 @@ export class StatusBar extends DrawableObject {
         super.draw(ctx);
 
         if (this.text !== "") {
-            ctx.font = "20px 'Courier New', monospace";
-            ctx.fillStyle = "white";
+            ctx.save();
+            ctx.font = "bold 22px 'Courier New', monospace";
+            ctx.fillStyle = "#00ffff";
+            ctx.shadowColor = "#00ffff"; 
+            ctx.shadowBlur = 10;
             ctx.textAlign = "left";
             ctx.fillText(this.text, this.x + 75, this.y + (this.height / 1.6));
+            ctx.restore();
         }
     }
 
