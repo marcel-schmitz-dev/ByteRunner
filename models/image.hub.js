@@ -79,7 +79,23 @@ export class ImageHub {
         "assets/img/monster/mouseDrone8.webp",
     ];
 
-    images_boss_transformation = [];
+    images_boss_hp = [
+    "assets/img/hud/boss_hp_bar0.webp",
+    "assets/img/hud/boss_hp_bar1.webp",
+    "assets/img/hud/boss_hp_bar2.webp",
+    "assets/img/hud/boss_hp_bar3.webp",
+    "assets/img/hud/boss_hp_bar4.webp",
+    "assets/img/hud/boss_hp_bar5.webp",
+];
+
+    images_boss_transformation = [
+        "assets/img/boss/bossTransformation0.webp",
+        "assets/img/boss/bossTransformation1.webp",
+        "assets/img/boss/bossTransformation2.webp",
+        "assets/img/boss/bossTransformation3.webp",
+        "assets/img/boss/bossTransformation4.webp",
+        "assets/img/boss/bossTransformation5.webp",
+    ];
     images_boss_walk = [
         "assets/img/boss/bossWalk0.webp",
         "assets/img/boss/bossWalk1.webp",
@@ -90,5 +106,12 @@ export class ImageHub {
         "assets/img/boss/bossWalk6.webp",
         "assets/img/boss/bossWalk7.webp",
         "assets/img/boss/bossWalk8.webp",
+    ];
+
+    images_boss_dead = [
+        "assets/img/boss/bossDead0.webp",
+        "assets/img/boss/bossDead1.webp",
+        "assets/img/boss/bossDead2.webp",
+        "assets/img/boss/bossDead3.webp",
     ];
 }

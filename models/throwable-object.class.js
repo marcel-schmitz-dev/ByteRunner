@@ -1,26 +1,31 @@
 import { MovableObject } from "./movable-objects.class.js";
 
 export class ThrowableObject extends MovableObject {
-    constructor(x, y) {
+    constructor(x, y, otherDirection) {
         super();
         this.loadImage("./assets/img/character/attack/disc.webp");
         this.x = x;
         this.y = y;
         this.height = 60;
         this.width = 60;
-        this.throw();
+        this.otherDirection = otherDirection;
+        this.throw(otherDirection);
     }
 
     isAboveGround() {
         return true;
     }
 
-    throw() {
+    throw(otherDirection) {
         this.speedY = 35;
         this.applyGravity();
 
         setInterval(() => {
-            this.x += 10;
+            if (otherDirection) {
+                this.x -= 10; 
+            } else {
+                this.x += 10;
+            }
         }, 25);
     }
 }
