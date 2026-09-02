@@ -28,14 +28,13 @@ export class Character extends MovableObject {
             if (
                 this.world &&
                 this.world.keyboard.RIGHT &&
-                this.x > 0 &&
                 this.x < this.world.level.level_end_x
             ) {
                 this.x += this.speed;
                 this.otherDirection = false;
             }
 
-            if (this.world && this.world.keyboard.LEFT) {
+            if (this.world && this.world.keyboard.LEFT && this.x > 0) {
                 this.x -= this.speed;
                 this.otherDirection = true;
             }

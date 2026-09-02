@@ -3,6 +3,7 @@ import { level1 } from "../levels/level1.js";
 import { StatusBar } from "./status-bar.class.js";
 import { CoinBar } from "./coin-bar.class.js";
 import { DiscBar } from "./disc-bar.class.js";
+import { ThrowableObject } from "./Throwable-object.class.js";
 
 export class World {
     character;
@@ -13,6 +14,7 @@ export class World {
     statusBar = new StatusBar();
     coinBar = new CoinBar();
     discBar = new DiscBar();
+    throwableObjects = [];
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext("2d");
@@ -20,18 +22,50 @@ export class World {
         this.keyboard = keyboard;
         this.character = new Character(this);
         this.draw();
-        this.checkCollisions();
+        this.run();
+        this.checkThrowObjects();
+    }
+
+    run() {
+        setInterval(() => {
+            this.checkCollisions();
+            this.checkThrowObjects();
+        }, 200);
+    }
+
+    checkThrowObjects() {
+        if (this.keyboard.THROW) {
+            let disc = new ThrowableObject(
+                this.character.x + 100,
+                this.character.y + 100,
+            );
+            this.throwableObjects.push(disc);
+        }
     }
 
     checkCollisions() {
+        this.level.enemies.forEach((enemy) => {
+            if (this.character.isColliding(enemy)) {
+                this.character.hit();
+                this.statusBar.setPercentage(this.character.energy);
+            }
+        });
+    }
+
+    lastThrowTime = 0;
+
+    checkThrowObjects() {
         setInterval(() => {
-            this.level.enemies.forEach((enemy) => {
-                if (this.character.isColliding(enemy)) {
-                    this.character.hit();
-                    this.statusBar.setPercentage(this.character.energy);
-                }
-            });
-        }, 200);
+            let currentTime = new Date().getTime();
+            if (this.keyboard.THROW && currentTime - this.lastThrowTime > 500) {
+                let disc = new ThrowableObject(
+                    this.character.x + 50,
+                    this.character.y + 50,
+                );
+                this.throwableObjects.push(disc);
+                this.lastThrowTime = currentTime;
+            }
+        }, 100);
     }
 
     draw() {
@@ -49,6 +83,7 @@ export class World {
         this.addObjectsToMap(this.level.clouds);
         this.addToMap(this.character);
         this.addObjectsToMap(this.level.enemies);
+        this.addObjectsToMap(this.throwableObjects);
 
         this.ctx.translate(-this.camera_x, 0);
 
