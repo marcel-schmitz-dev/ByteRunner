@@ -23,6 +23,16 @@ export class ImageHub {
         "assets/img/character/jump/jump4.webp",
     ];
 
+    images_dead = [
+        "assets/img/character/dead/dead0.webp",
+        "assets/img/character/dead/dead1.webp",
+        "assets/img/character/dead/dead2.webp",
+        "assets/img/character/dead/dead3.webp",
+        "assets/img/character/dead/dead4.webp",
+        "assets/img/character/dead/dead5.webp",
+        
+    ]
+
     // ==========================================
     //        GEGNER BILDER (ENEMIES)
     // ==========================================

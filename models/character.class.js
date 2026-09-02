@@ -17,6 +17,7 @@ export class Character extends MovableObject {
         this.loadImage("assets/img/character/walk/stehen.webp");
         this.loadImages(this.imageHub.images_walking);
         this.loadImages(this.imageHub.images_jumping);
+        this.loadImages(this.imageHub.images_dead);
         this.applyGravity();
         this.animate();
     }
@@ -52,7 +53,15 @@ export class Character extends MovableObject {
         }, 1000 / 60);
 
         setInterval(() => {
-            if (this.isAboveGround()) {
+            if (this.isDead()) {
+                let i = Math.min(
+                    this.currentImage,
+                    this.imageHub.images_dead.length - 1,
+                );
+                let path = this.imageHub.images_dead[i];
+                this.img = this.imageCache[path];
+                this.currentImage++;
+            } else if (this.isAboveGround()) {
                 let i = Math.min(
                     this.currentImage,
                     this.imageHub.images_jumping.length - 1,
@@ -72,7 +81,7 @@ export class Character extends MovableObject {
                     this.currentImage++;
                 } else {
                     this.loadImage("assets/img/character/walk/stehen.webp");
-                    this.currentImage = 0; 
+                    this.currentImage = 0;
                 }
             }
         }, 1000 / 12);
