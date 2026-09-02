@@ -1,4 +1,8 @@
 export class ImageHub {
+    // ==========================================
+    //        CHARAKTER BILDER (HERO)
+    // ==========================================
+
     images_walking = [
         "assets/img/character/walk/walk0.webp",
         "assets/img/character/walk/walk1.webp",
@@ -10,6 +14,18 @@ export class ImageHub {
         "assets/img/character/walk/walk7.webp",
         "assets/img/character/walk/walk8.webp",
     ];
+
+    images_jumping = [
+        "assets/img/character/jump/jump0.webp",
+        "assets/img/character/jump/jump1.webp",
+        "assets/img/character/jump/jump2.webp",
+        "assets/img/character/jump/jump3.webp",
+        "assets/img/character/jump/jump4.webp",
+    ];
+
+    // ==========================================
+    //        GEGNER BILDER (ENEMIES)
+    // ==========================================
 
     images_hard_drive = [
         "assets/img/monster/hardDrive0.webp",
@@ -34,6 +50,10 @@ export class ImageHub {
         "assets/img/monster/mouseDrone7.webp",
         "assets/img/monster/mouseDrone8.webp",
     ];
+
+    images_boss_transformation = [
+
+    ]
     images_boss_walk = [
         "assets/img/boss/bossWalk0.webp",
         "assets/img/boss/bossWalk1.webp",

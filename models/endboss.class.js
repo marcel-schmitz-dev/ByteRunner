@@ -11,7 +11,7 @@ export class Endboss extends MovableObject {
 
     constructor(startX) {
         super();
-        this.loadImage("assets/img/boss/bossTransformation5.png");
+        this.loadImage("assets/img/boss/bossTransformation5.webp");
         this.loadImages(this.imageHub.images_boss_walk);
 
         this.x = startX !== undefined ? startX : 2700;

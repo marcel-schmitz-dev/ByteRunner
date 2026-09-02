@@ -5,9 +5,31 @@ export class MovableObject {
     imageCache = {};
     height = 130;
     width = 100;
-    speed= 0.15;
+    speed = 0.15;
     otherDirection = false;
-    
+    speedY = 0;
+    acceleration = 2.5;
+
+    applyGravity() {
+        setInterval(() => {
+            if (this.isAboveGround() || this.speedY > 0) {
+                this.y -= this.speedY;
+                this.speedY -= this.acceleration;
+            } else {
+                this.speedY = 0;
+                this.y = 300;
+            }
+        }, 1000 / 25);
+    }
+
+    isAboveGround() {
+        return this.y < 300;
+    }
+
+    isAboveGround() {
+        return this.y < 300;
+    }
+
     loadImage(path) {
         this.img = new Image();
         this.img.src = path;
