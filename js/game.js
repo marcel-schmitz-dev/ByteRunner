@@ -1,9 +1,11 @@
 import { World } from "../models/world.class.js";
 import { Keyboard } from "../models/keyboard.class.js";
+import { AudioHub } from "../models/audio.hub.js";
 
 let canvas;
 let world;
 let keyboard = new Keyboard();
+let isStarting = false;
 
 function init() {
     canvas = document.getElementById("canvas");
@@ -35,7 +37,6 @@ window.addEventListener("keyup", (e) => {
     if (e.code == "KeyL") keyboard.THROW = false;
 });
 
-// Global machen für das HTML (onclick)
 window.toggleModal = function (modalId) {
     let modal = document.getElementById(modalId);
     if (modal) {
@@ -44,9 +45,83 @@ window.toggleModal = function (modalId) {
 };
 
 window.startGame = function () {
+    if (isStarting) return;
+    isStarting = true;
+
     let startScreen = document.getElementById("start-screen");
-    if (startScreen) {
-        startScreen.style.display = "none";
+
+    let startBtn = document.getElementById("start-btn");
+    if (startBtn) startBtn.style.display = "none";
+
+    let countdownDiv = document.getElementById("countdown-display");
+    if (!countdownDiv) {
+        countdownDiv = document.createElement("div");
+        countdownDiv.id = "countdown-display";
+        countdownDiv.style.position = "absolute";
+        countdownDiv.style.top = "50%";
+        countdownDiv.style.left = "50%";
+        countdownDiv.style.transform = "translate(-50%, -50%)";
+        countdownDiv.style.fontSize = "90px";
+        countdownDiv.style.fontWeight = "bold";
+        countdownDiv.style.zIndex = "100";
+
+        countdownDiv.style.fontFamily = '"Courier New", Courier, monospace';
+        countdownDiv.style.background =
+            "linear-gradient(90deg, #00ffff, #ff0080)";
+        countdownDiv.style.webkitBackgroundClip = "text";
+        countdownDiv.style.webkitTextFillColor = "transparent";
+        countdownDiv.style.textShadow = "0 0 20px rgba(0, 255, 255, 0.4)";
+
+        startScreen.appendChild(countdownDiv);
     }
-    init(); // Startet das Spiel erst jetzt beim Klick!
+
+    let steps = ["3", "2", "1", "GO!"];
+    let stepIndex = 0;
+
+    let tempAudioHub = new AudioHub();
+    let countdownSound = tempAudioHub.sounds["startSoundCountdown"];
+
+    function startCountdownVisuals() {
+        countdownDiv.innerHTML = steps[stepIndex];
+        let countInterval = setInterval(() => {
+            stepIndex++;
+            if (stepIndex < steps.length) {
+                countdownDiv.innerHTML = steps[stepIndex];
+            } else {
+                clearInterval(countInterval);
+            }
+        }, 1000);
+    }
+
+    if (countdownSound) {
+        countdownSound.volume = 0.6;
+        countdownSound.currentTime = 0;
+
+        countdownSound.onended = function () {
+            if (startScreen) {
+                startScreen.style.display = "none";
+            }
+            init();
+        };
+
+        countdownSound.play().catch((e) => {
+            console.log("Audio play blocked, starting game directly:", e);
+            if (startScreen) {
+                startScreen.style.display = "none";
+            }
+            init();
+        });
+
+        setTimeout(() => {
+            startCountdownVisuals();
+        }, 350);
+    } else {
+        startCountdownVisuals();
+        setTimeout(() => {
+            if (startScreen) {
+                startScreen.style.display = "none";
+            }
+            init();
+        }, 4000);
+    }
 };

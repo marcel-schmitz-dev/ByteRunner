@@ -8,8 +8,7 @@ export class Cloud extends MovableObject {
         super();
         this.loadImage("assets/img/cloud/cloud.webp");
 
-        // Nutze den übergebenen Wert oder fallback auf Zufall, falls leer
-        this.x = startX !== undefined ? startX : Math.random() * 2500;
+        this.x = startX !== undefined ? startX : Math.random() * 3200;
         this.y = 50;
 
         this.animate();

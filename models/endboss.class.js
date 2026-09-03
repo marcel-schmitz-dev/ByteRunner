@@ -22,7 +22,7 @@ export class Endboss extends MovableObject {
         this.loadImages(this.imageHub.images_boss_walk);
         this.loadImages(this.imageHub.images_boss_dead);
 
-        this.x = startX !== undefined ? startX : 2700;
+        this.x = startX !== undefined ? startX : 3200;
         this.y = 80;
     }
 
@@ -68,6 +68,13 @@ export class Endboss extends MovableObject {
         setInterval(() => {
             if (this.isDead()) {
                 if (!this.isDeadAnimationPlayed) {
+                    this.isDeadAnimationPlayed = true;
+
+                    if (this.world && this.world.audioHub) {
+                        this.world.audioHub.play("bossDead", 1.0);
+                        this.world.audioHub.stop("bossLaufSound");
+                    }
+
                     let deadIndex = 0;
                     let deadInterval = setInterval(() => {
                         if (deadIndex < this.imageHub.images_boss_dead.length) {
@@ -77,7 +84,6 @@ export class Endboss extends MovableObject {
                             deadIndex++;
                         } else {
                             clearInterval(deadInterval);
-                            this.isDeadAnimationPlayed = true;
                         }
                     }, 150);
                 }

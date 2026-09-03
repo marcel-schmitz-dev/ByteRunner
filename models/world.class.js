@@ -4,6 +4,7 @@ import { StatusBar } from "./status-bar.class.js";
 import { BossHpBar } from "./boss-hp-bar.class.js";
 import { ThrowableObject } from "./throwable-object.class.js";
 import { ImageHub } from "./image.hub.js";
+import { AudioHub } from "./audio.hub.js";
 
 export class World {
     character;
@@ -25,11 +26,13 @@ export class World {
     bossSpawned = false;
     throwableObjects = [];
     lastThrowTime = 0;
+    audioHub = new AudioHub();
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext("2d");
         this.canvas = canvas;
         this.keyboard = keyboard;
+        this.audioHub.play("background", 0.2);
         this.character = new Character(this);
         this.draw();
         this.run();
@@ -57,9 +60,21 @@ export class World {
         this.level.enemies.forEach((enemy) => {
             if (enemy.constructor.name === "Endboss") {
                 let distance = enemy.x - this.character.x;
-                if (distance < 500 && distance > -200 && !enemy.hasBeenSeen) {
+                if (
+                    ((distance < 500 && distance > -200) ||
+                        this.character.x >= 2880) &&
+                    !enemy.hasBeenSeen
+                ) {
+                    enemy.world = this;
                     enemy.awakening();
                     this.bossSpawned = true;
+
+                    this.audioHub.stop("background");
+                    this.audioHub.stop("backgroundSound");
+
+                    this.audioHub.play("bossDetected", 0.4);
+                    this.audioHub.play("bossFightSound", 0.3);
+                    this.audioHub.play("bossLaufSound", 0.4);
                 }
             }
         });
@@ -71,6 +86,8 @@ export class World {
                 if (this.character.isColliding(coin)) {
                     this.character.coins = (this.character.coins || 0) + 1;
                     if (this.character.coins > 10) this.character.coins = 10;
+
+                    this.audioHub.play("pickCoin", 0.5);
 
                     let coinPercentage = this.character.coins * 10;
                     this.coinBar.setPercentage(
@@ -88,6 +105,8 @@ export class World {
                 if (this.character.isColliding(discItem)) {
                     this.character.discs = (this.character.discs || 0) + 1;
                     if (this.character.discs > 10) this.character.discs = 10;
+
+                    this.audioHub.play("pickDisc", 0.5);
 
                     let discPercentage = this.character.discs * 20;
                     this.discBar.setPercentage(
@@ -108,8 +127,13 @@ export class World {
                 if (this.character.discs && this.character.discs > 0) {
                     this.character.discs--;
 
+                    this.audioHub.play("characterDiscWerfen", 0.6);
+
                     let discPercentage = this.character.discs * 10;
-                    this.discBar.setPercentage(discPercentage, `${this.character.discs}`);
+                    this.discBar.setPercentage(
+                        discPercentage,
+                        `${this.character.discs}`,
+                    );
 
                     let discX = this.character.otherDirection
                         ? this.character.x - 10
@@ -146,6 +170,7 @@ export class World {
 
                 if (isJumpingOnTop) {
                     this.character.speedY = 22;
+                    this.audioHub.play("enemiesDead", 0.5);
                     this.level.enemies.splice(enemyIndex, 1);
                 } else {
                     if (!this.character.isHurt()) {
@@ -173,6 +198,8 @@ export class World {
                     if (typeof enemy.hit === "function") {
                         enemy.hit(20);
                         this.bossHpBar.setPercentage(enemy.energy);
+
+                        this.audioHub.play("bossHurt", 0.5);
                     }
                 }
             });
@@ -194,7 +221,7 @@ export class World {
         );
 
         this.addObjectsToMap(this.level.clouds);
-        this.addObjectsToMap(this.level.coins); 
+        this.addObjectsToMap(this.level.coins);
         this.addObjectsToMap(this.level.collectibleDiscs);
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.throwableObjects);

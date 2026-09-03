@@ -25,6 +25,23 @@ export class Character extends MovableObject {
         this.animate();
     }
 
+    hit(damage = 5) {
+        super.hit(damage);
+
+        if (
+            this.isDead() &&
+            !this.isGameOverPlayed &&
+            this.world &&
+            this.world.audioHub
+        ) {
+            this.isGameOverPlayed = true;
+
+            this.world.audioHub.play("gameOverSound", 0.8);
+            this.world.audioHub.stop("background");
+            this.world.audioHub.stop("characterRun");
+        }
+    }
+
     animate() {
         setInterval(() => {
             if (
@@ -56,13 +73,21 @@ export class Character extends MovableObject {
 
         setInterval(() => {
             if (this.isDead()) {
+                if (this.deadAnimationStarted !== true) {
+                    this.deadAnimationStarted = true;
+                    this.currentImage = 0;
+                }
+
                 let i = Math.min(
                     this.currentImage,
                     this.imageHub.images_dead.length - 1,
                 );
                 let path = this.imageHub.images_dead[i];
                 this.img = this.imageCache[path];
-                this.currentImage++;
+
+                if (this.currentImage < this.imageHub.images_dead.length - 1) {
+                    this.currentImage++;
+                }
             } else if (this.isHurt()) {
                 let i = this.currentImage % this.imageHub.images_hurt.length;
                 let path = this.imageHub.images_hurt[i];
@@ -77,18 +102,27 @@ export class Character extends MovableObject {
                 this.img = this.imageCache[path];
                 this.currentImage++;
             } else {
-                if (
-                    this.world &&
-                    (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)
-                ) {
+                if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
                     let i =
                         this.currentImage % this.imageHub.images_walking.length;
                     let path = this.imageHub.images_walking[i];
                     this.img = this.imageCache[path];
                     this.currentImage++;
+
+                    if (
+                        !this.isAboveGround() &&
+                        this.world &&
+                        this.world.audioHub
+                    ) {
+                        this.world.audioHub.play("characterRun", 0.2);
+                    }
                 } else {
                     this.loadImage("assets/img/character/walk/stehen.webp");
                     this.currentImage = 0;
+
+                    if (this.world && this.world.audioHub) {
+                        this.world.audioHub.stop("characterRun");
+                    }
                 }
             }
         }, 1000 / 12);
@@ -96,6 +130,9 @@ export class Character extends MovableObject {
 
     jump() {
         this.speedY = 25;
-        this.currentImage = 0;
+
+        if (this.world && this.world.audioHub) {
+            this.world.audioHub.play("characterJump", 0.4);
+        }
     }
 }
