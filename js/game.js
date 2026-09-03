@@ -93,18 +93,18 @@ window.startGame = function () {
         }, 1000);
     }
 
-    if (countdownSound) {
-        countdownSound.volume = 0.6;
-        countdownSound.currentTime = 0;
+    if (countdownSound && countdownSound.file) {
+        countdownSound.file.volume = 0.6;
+        countdownSound.file.currentTime = 0;
 
-        countdownSound.onended = function () {
+        countdownSound.file.onended = function () {
             if (startScreen) {
                 startScreen.style.display = "none";
             }
             init();
         };
 
-        countdownSound.play().catch((e) => {
+        countdownSound.file.play().catch((e) => {
             console.log("Audio play blocked, starting game directly:", e);
             if (startScreen) {
                 startScreen.style.display = "none";
