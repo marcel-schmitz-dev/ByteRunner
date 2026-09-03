@@ -49,5 +49,5 @@ Da das Projekt ohne schwere Build-Tools auskommt, kannst du es ganz einfach loka
 
 1. Repository klonen:
     ```bash
-    git clone [https://github.com/marcel-schmitz-dev/ByteRunner.git](https://github.com/marcel-schmitz-dev/ByteRunner.git)
+    git clone https://github.com/marcel-schmitz-dev/ByteRunner.git``
     ```
