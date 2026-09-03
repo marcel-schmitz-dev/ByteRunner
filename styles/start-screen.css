@@ -20,16 +20,21 @@
     z-index: 100;
     font-family: "Courier New", Courier, monospace;
     box-sizing: border-box;
+    overflow: hidden; /* Verhindert, dass etwas übersteht */
 }
 
 .menu-content {
     text-align: center;
+    width: 85%;
+    max-width: 400px;
+    transform: scale(clamp(0.6, 1vw + 0.4rem, 1));
+    transform-origin: center center;
 }
 
 .game-title {
-    font-size: 3.5rem;
+    font-size: clamp(2rem, 6vw, 3.5rem);
     font-weight: bold;
-    margin-bottom: 35px;
+    margin-bottom: 25px;
     background: linear-gradient(90deg, #00ffff, #ff0080);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -40,7 +45,8 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
-    width: 240px;
+    width: 100%;
+    max-width: 240px;
     margin: 0 auto;
 }
 
@@ -49,7 +55,11 @@
     border: 3px solid #000000;
     color: #00ffff;
     padding: 10px 20px;
-    font-size: 1.1rem;
+    font-size: clamp(
+        0.9rem,
+        2vw,
+        1.1rem
+    );
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
