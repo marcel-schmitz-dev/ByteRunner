@@ -68,7 +68,7 @@ export class Endboss extends MovableObject {
                 clearInterval(transformInterval);
                 this.completeAwakening();
             }
-        }, 150);
+        }, 250);
     }
 
     /**
@@ -117,6 +117,22 @@ export class Endboss extends MovableObject {
         this.isDeadAnimationPlayed = true;
         this.playBossDeathAudio();
         this.runBossDeathAnimation();
+        this.scheduleWinScreenDisplay();
+    }
+
+    /**
+     * Schedules the display of the win screen after the death animation completes.
+     */
+    scheduleWinScreenDisplay() {
+        let animationDuration = this.imageHub.images_boss_dead.length * 150;
+        let viewingBuffer = 1000;
+
+        setTimeout(() => {
+            let winScreen = document.getElementById("win-screen");
+            if (winScreen) {
+                winScreen.classList.remove("hidden");
+            }
+        }, animationDuration + viewingBuffer);
     }
 
     /**

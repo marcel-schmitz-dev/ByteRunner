@@ -18,6 +18,7 @@ export class Character extends MovableObject {
     world;
     deadAnimationStarted = false;
     isGameOverPlayed = false;
+    isBouncing = false;
 
     /**
      * Creates a new character instance and initializes its resources, gravity, and animation loops.
@@ -79,7 +80,10 @@ export class Character extends MovableObject {
      * Processes left and right movement flags based on keyboard input.
      */
     handleHorizontalMovement() {
-        if (this.world?.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
+        if (
+            this.world?.keyboard.RIGHT &&
+            this.x < this.world.level.level_end_x
+        ) {
             this.x += this.speed;
             this.otherDirection = false;
         }
@@ -93,7 +97,11 @@ export class Character extends MovableObject {
      * Triggers a jump if the up key is pressed and the character is grounded.
      */
     handleVerticalMovement() {
-        if (this.world?.keyboard.UP && !this.isAboveGround() && this.speedY === 0) {
+        if (
+            this.world?.keyboard.UP &&
+            !this.isAboveGround() &&
+            this.speedY === 0
+        ) {
             this.jump();
         }
     }
@@ -128,13 +136,32 @@ export class Character extends MovableObject {
         if (!this.deadAnimationStarted) {
             this.deadAnimationStarted = true;
             this.currentImage = 0;
+            this.scheduleGameOverScreen(); // Hier wird der Game-Over-Screen getriggert
         }
-        let index = Math.min(this.currentImage, this.imageHub.images_dead.length - 1);
+        let index = Math.min(
+            this.currentImage,
+            this.imageHub.images_dead.length - 1,
+        );
         this.img = this.imageCache[this.imageHub.images_dead[index]];
         if (this.currentImage < this.imageHub.images_dead.length - 1) {
             this.currentImage++;
         }
         return true;
+    }
+
+    /**
+     * Schedules the display of the game over screen after the death animation completes.
+     */
+    scheduleGameOverScreen() {
+        let animationDuration = this.imageHub.images_dead.length * (1000 / 12);
+        let viewingBuffer = 1000;
+
+        setTimeout(() => {
+            let gameOverScreen = document.getElementById("game-over-screen");
+            if (gameOverScreen) {
+                gameOverScreen.classList.remove("hidden");
+            }
+        }, animationDuration + viewingBuffer);
     }
 
     /**
@@ -155,7 +182,10 @@ export class Character extends MovableObject {
      */
     handleJumpingAnimation() {
         if (!this.isAboveGround()) return false;
-        let index = Math.min(this.currentImage, this.imageHub.images_jumping.length - 1);
+        let index = Math.min(
+            this.currentImage,
+            this.imageHub.images_jumping.length - 1,
+        );
         this.img = this.imageCache[this.imageHub.images_jumping[index]];
         this.currentImage++;
         return true;
@@ -169,13 +199,24 @@ export class Character extends MovableObject {
             let index = this.currentImage % this.imageHub.images_walking.length;
             this.img = this.imageCache[this.imageHub.images_walking[index]];
             this.currentImage++;
-            if (!this.isAboveGround() && this.world?.audioHub) {
-                this.world.audioHub.play("characterRun", 0.2);
+            if (
+                !this.isAboveGround() &&
+                this.speedY === 0 &&
+                this.world?.audioHub
+            ) {
+                if (!this.isRunningSoundActive) {
+                    this.world.audioHub.play("characterRun", 0.6);
+                    this.isRunningSoundActive = true;
+                }
+            } else {
+                this.world?.audioHub?.stop("characterRun");
+                this.isRunningSoundActive = false;
             }
         } else {
             this.loadImage("assets/img/character/walk/stehen.webp");
             this.currentImage = 0;
             this.world?.audioHub?.stop("characterRun");
+            this.isRunningSoundActive = false;
         }
     }
 

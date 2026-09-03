@@ -100,6 +100,22 @@
                 </div>
             </div>
         </div>
+        
+<div id="game-over-screen" class="game-overlay hidden">
+    <div class="overlay-content">
+        <h2>SYSTEM FAILURE</h2>
+        <p>CHARACTER TERMINATED</p>
+        <button onclick="restartGame()" class="cyber-btn">RESTART</button>
+    </div>
+</div>
+
+<div id="win-screen" class="game-overlay hidden">
+    <div class="overlay-content">
+        <h2>MISSION ACCOMPLISHED</h2>
+        <p>CYBERPUNK BOSS ELIMINATED</p>
+        <button onclick="restartGame()" class="cyber-btn">RESTART</button>
+    </div>
+</div>
 
         <script type="module" src="js/game.js"></script>
     </body>

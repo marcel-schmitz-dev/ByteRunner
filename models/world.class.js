@@ -92,7 +92,8 @@ export class World {
      */
     shouldAwakenBoss(enemy) {
         let distance = enemy.x - this.character.x;
-        let isWithinRange = (distance < 500 && distance > -200) || this.character.x >= 2880;
+        let isWithinRange =
+            (distance < 500 && distance > -200) || this.character.x >= 2880;
         return isWithinRange && !enemy.hasBeenSeen;
     }
 
@@ -127,9 +128,15 @@ export class World {
         if (!this.level.coins) return;
         this.level.coins.forEach((coin, index) => {
             if (this.character.isColliding(coin)) {
-                this.character.coins = Math.min((this.character.coins || 0) + 1, 10);
+                this.character.coins = Math.min(
+                    (this.character.coins || 0) + 1,
+                    10,
+                );
                 this.audioHub.play("pickCoin", 0.5);
-                this.coinBar.setPercentage(this.character.coins * 10, `${this.character.coins}`);
+                this.coinBar.setPercentage(
+                    this.character.coins * 10,
+                    `${this.character.coins}`,
+                );
                 this.level.coins.splice(index, 1);
             }
         });
@@ -142,9 +149,15 @@ export class World {
         if (!this.level.collectibleDiscs) return;
         this.level.collectibleDiscs.forEach((discItem, index) => {
             if (this.character.isColliding(discItem)) {
-                this.character.discs = Math.min((this.character.discs || 0) + 1, 10);
+                this.character.discs = Math.min(
+                    (this.character.discs || 0) + 1,
+                    10,
+                );
                 this.audioHub.play("pickDisc", 0.5);
-                this.discBar.setPercentage(this.character.discs * 20, `${this.character.discs}`);
+                this.discBar.setPercentage(
+                    this.character.discs * 20,
+                    `${this.character.discs}`,
+                );
                 this.level.collectibleDiscs.splice(index, 1);
             }
         });
@@ -156,8 +169,9 @@ export class World {
     checkThrowObjects() {
         setInterval(() => {
             let currentTime = new Date().getTime();
-            let canThrow = this.keyboard.THROW && currentTime - this.lastThrowTime > 500;
-            
+            let canThrow =
+                this.keyboard.THROW && currentTime - this.lastThrowTime > 500;
+
             if (canThrow && this.character.discs && this.character.discs > 0) {
                 this.executeThrow(currentTime);
             }
@@ -170,12 +184,21 @@ export class World {
      */
     executeThrow(currentTime) {
         this.character.discs--;
-        this.audioHub.play("characterDiscWerfen", 0.6);
-        this.discBar.setPercentage(this.character.discs * 20, `${this.character.discs}`);
+        this.audioHub.play("characterDiscWerfen", 0.5);
+        this.discBar.setPercentage(
+            this.character.discs * 20,
+            `${this.character.discs}`,
+        );
 
-        let discX = this.character.otherDirection ? this.character.x - 10 : this.character.x + 50;
-        let disc = new ThrowableObject(discX, this.character.y + 50, this.character.otherDirection);
-        
+        let discX = this.character.otherDirection
+            ? this.character.x - 10
+            : this.character.x + 50;
+        let disc = new ThrowableObject(
+            discX,
+            this.character.y + 50,
+            this.character.otherDirection,
+        );
+
         this.throwableObjects.push(disc);
         this.lastThrowTime = currentTime;
     }
@@ -225,10 +248,17 @@ export class World {
         let isEndboss = this.isEndboss(enemy);
         let characterBottom = this.character.y + this.character.height;
         let isFalling = this.character.speedY < 0;
-        let isJumpingOnTop = !isEndboss && isFalling && characterBottom <= enemy.y + 30;
+        let isJumpingOnTop =
+            !isEndboss && isFalling && characterBottom <= enemy.y + 30;
 
         if (isJumpingOnTop) {
             this.character.speedY = 22;
+            this.character.isBouncing = true;
+
+            setTimeout(() => {
+                this.character.isBouncing = false;
+            }, 300);
+
             this.audioHub.play("enemiesDead", 0.5);
             this.level.enemies.splice(enemyIndex, 1);
         } else if (!this.character.isHurt()) {
@@ -321,7 +351,12 @@ export class World {
      */
     drawDarkOverlay() {
         this.ctx.fillStyle = "rgba(10, 10, 20, 0.4)";
-        this.ctx.fillRect(-this.camera_x, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillRect(
+            -this.camera_x,
+            0,
+            this.canvas.width,
+            this.canvas.height,
+        );
     }
 
     /**

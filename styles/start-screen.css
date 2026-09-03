@@ -18,9 +18,9 @@
     justify-content: center;
     align-items: center;
     z-index: 100;
-    font-family: "Courier New", Courier, monospace;
+    font-family: "JetBrains Mono", monospace;
     box-sizing: border-box;
-    overflow: hidden; /* Verhindert, dass etwas übersteht */
+    overflow: hidden;
 }
 
 .menu-content {
@@ -32,6 +32,7 @@
 }
 
 .game-title {
+    font-family: "Orbitron", sans-serif;
     font-size: clamp(2rem, 6vw, 3.5rem);
     font-weight: bold;
     margin-bottom: 25px;
@@ -55,11 +56,8 @@
     border: 3px solid #000000;
     color: #00ffff;
     padding: 10px 20px;
-    font-size: clamp(
-        0.9rem,
-        2vw,
-        1.1rem
-    );
+    font-family: "Orbitron", sans-serif;
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
@@ -80,4 +78,63 @@
         -12px 0 25px rgba(0, 255, 255, 0.7),
         12px 0 25px rgba(255, 0, 128, 0.7),
         0 0 15px rgba(0, 0, 0, 0.9);
+}
+
+.game-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 10, 20, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    font-family: "Orbitron", sans-serif;
+}
+
+.game-overlay.hidden {
+    display: none;
+}
+
+.overlay-content {
+    text-align: center;
+    color: #fff;
+}
+
+.overlay-content h2 {
+    font-size: clamp(30px, 5vw, 60px);
+    color: #ff0080;
+    text-shadow: 0 0 20px rgba(255, 0, 128, 0.6);
+    margin-bottom: 10px;
+}
+
+.overlay-content p {
+    font-size: clamp(16px, 2vw, 24px);
+    color: #00ffff;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+}
+
+.cyber-btn {
+    background: linear-gradient(90deg, #00ffff, #ff0080);
+    color: #0a0a14;
+    border: none;
+    padding: 12px 30px;
+    font-size: 18px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+}
+
+.cyber-btn:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.7), 0 0 25px rgba(255, 0, 128, 0.7);
+    transform: scale(1.05);
 }
