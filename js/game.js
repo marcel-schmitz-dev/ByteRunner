@@ -19,7 +19,6 @@ function init() {
     }
     world = new World(canvas, keyboard);
 
-    // Übernehme den Mute-Zustand, falls vor dem Start gemuted wurde
     if (globalAudioHub.isMuted) {
         world.audioHub.isMuted = true;
         for (let key in world.audioHub.sounds) {
@@ -32,7 +31,6 @@ function init() {
 
     window.world = world;
 
-    // Mobile Touch-Steuerung nach dem Laden der Welt initialisieren
     initTouchControls();
 }
 
@@ -65,6 +63,11 @@ function handleKeyUp(e) {
 window.addEventListener("keydown", handleKeyDown);
 window.addEventListener("keyup", handleKeyUp);
 
+// Initialisiert den Mute-Button UI direkt beim Laden der Seite
+document.addEventListener("DOMContentLoaded", () => {
+    updateMuteButtonUI(globalAudioHub.isMuted);
+});
+
 /**
  * Initialisiert die Touch-Steuerung für mobile Geräte und Tablets.
  */
@@ -74,30 +77,42 @@ function initTouchControls() {
         if (!btn) return;
 
         // Touch Start (Taste drücken)
-        btn.addEventListener("touchstart", (e) => {
-            e.preventDefault();
-            keyboard[keyName] = true;
-            btn.classList.add("active");
-        }, { passive: false });
+        btn.addEventListener(
+            "touchstart",
+            (e) => {
+                e.preventDefault();
+                keyboard[keyName] = true;
+                btn.classList.add("active");
+            },
+            { passive: false },
+        );
 
         // Touch End / Cancel (Taste loslassen)
-        btn.addEventListener("touchend", (e) => {
-            e.preventDefault();
-            keyboard[keyName] = false;
-            btn.classList.remove("active");
-        }, { passive: false });
+        btn.addEventListener(
+            "touchend",
+            (e) => {
+                e.preventDefault();
+                keyboard[keyName] = false;
+                btn.classList.remove("active");
+            },
+            { passive: false },
+        );
 
-        btn.addEventListener("touchcancel", (e) => {
-            e.preventDefault();
-            keyboard[keyName] = false;
-            btn.classList.remove("active");
-        }, { passive: false });
+        btn.addEventListener(
+            "touchcancel",
+            (e) => {
+                e.preventDefault();
+                keyboard[keyName] = false;
+                btn.classList.remove("active");
+            },
+            { passive: false },
+        );
     };
 
     // Verknüpfe die HTML-Buttons mit den Keyboard-Properties
     bindTouchButton("btn-left", "LEFT");
     bindTouchButton("btn-right", "RIGHT");
-    bindTouchButton("btn-jump", "UP");    // Springen (wie Pfeil Oben / W)
+    bindTouchButton("btn-jump", "UP"); // Springen (wie Pfeil Oben / W)
     bindTouchButton("btn-throw", "THROW"); // Werfen (wie Taste L)
 }
 

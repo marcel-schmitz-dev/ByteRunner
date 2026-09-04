@@ -22,7 +22,8 @@ export class AudioHub {
      * Creates an audio hub and initializes all available sound resources.
      */
     constructor() {
-        this.isMuted = false;
+        this.isMuted = localStorage.getItem("byteRunner_muted") === "true";
+        
         this.sounds = {
             background: new MyAudio("assets/audio/background.mp3"),
             bossDead: new MyAudio("assets/audio/boss_dead.mp3"),
@@ -51,53 +52,19 @@ export class AudioHub {
         this.sounds.bossLaufSound.file.loop = true;
         this.sounds.characterRun.file.loop = true;
         this.sounds.bossFightSound.file.loop = true;
-    }
 
-    /**
-     * Plays a registered sound from the beginning at the specified volume.
-     *
-     * If playback is blocked by the browser, muted, or otherwise fails, the error is
-     * logged to the console. Unknown sound names are ignored.
-     *
-     * @param {string} soundName - The name of the sound to play.
-     * @param {number} [volume=1.0] - The playback volume, usually from 0.0 to 1.0.
-     * @returns {void}
-     */
-    play(soundName, volume = 1.0) {
-        if (this.isMuted) return;
-        let soundObj = this.sounds[soundName];
-        if (soundObj) {
-            soundObj.file.currentTime = 0;
-            soundObj.file.volume = volume;
-            soundObj.file.play().catch((e) => {
-                console.log("Audio play blocked or error:", e);
-            });
+        for (let key in this.sounds) {
+            let soundObj = this.sounds[key];
+            if (soundObj && soundObj.file) {
+                soundObj.file.muted = this.isMuted;
+            }
         }
     }
 
-    /**
-     * Stops a registered sound and resets its playback position.
-     *
-     * Unknown sound names are ignored.
-     *
-     * @param {string} soundName - The name of the sound to stop.
-     * @returns {void}
-     */
-    stop(soundName) {
-        let soundObj = this.sounds[soundName];
-        if (soundObj) {
-            soundObj.file.pause();
-            soundObj.file.currentTime = 0;
-        }
-    }
-
-    /**
-     * Toggles the global mute state for all preloaded audio assets.
-     *
-     * @returns {boolean} The updated mute status.
-     */
     toggleMute() {
         this.isMuted = !this.isMuted;
+        localStorage.setItem("byteRunner_muted", this.isMuted);
+
         for (let key in this.sounds) {
             let soundObj = this.sounds[key];
             if (soundObj && soundObj.file) {
