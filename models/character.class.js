@@ -20,6 +20,7 @@ export class Character extends MovableObject {
     isGameOverPlayed = false;
     isBouncing = false;
     idleTime = 0;
+    isSnoringSoundActive = false;
 
     /**
      * Creates a new character instance and initializes its resources, gravity, and animation loops.
@@ -54,6 +55,7 @@ export class Character extends MovableObject {
         super.hit(damage);
         if (this.isDead() && !this.isGameOverPlayed && this.world?.audioHub) {
             this.isGameOverPlayed = true;
+            this.stopSnoring();
             this.world.audioHub.play("gameOverSound", 0.8);
             this.world.audioHub.stop("background");
             this.world.audioHub.stop("characterRun");
@@ -136,6 +138,7 @@ export class Character extends MovableObject {
      */
     handleDeadAnimation() {
         if (!this.isDead()) return false;
+        this.stopSnoring();
         if (!this.deadAnimationStarted) {
             this.deadAnimationStarted = true;
             this.currentImage = 0;
@@ -173,6 +176,7 @@ export class Character extends MovableObject {
      */
     handleHurtAnimation() {
         if (!this.isHurt()) return false;
+        this.stopSnoring();
         let index = this.currentImage % this.imageHub.images_hurt.length;
         this.img = this.imageCache[this.imageHub.images_hurt[index]];
         this.currentImage++;
@@ -185,6 +189,7 @@ export class Character extends MovableObject {
      */
     handleJumpingAnimation() {
         if (!this.isAboveGround()) return false;
+        this.stopSnoring();
         let index = Math.min(
             this.currentImage,
             this.imageHub.images_jumping.length - 1,
@@ -216,6 +221,17 @@ export class Character extends MovableObject {
         this.idleTime = 0;
         this.world?.audioHub?.stop("characterRun");
         this.isRunningSoundActive = false;
+        this.stopSnoring();
+    }
+
+    /**
+     * Stops the snoring sound if active.
+     */
+    stopSnoring() {
+        if (this.isSnoringSoundActive && this.world?.audioHub) {
+            this.world.audioHub.stop("character_snoring");
+            this.isSnoringSoundActive = false;
+        }
     }
 
     /**
@@ -223,7 +239,12 @@ export class Character extends MovableObject {
      * @param {boolean} isMoving - Whether the character is moving.
      */
     handleRunningAudio(isMoving) {
-        if (!this.isAboveGround() && this.speedY === 0 && this.world?.audioHub && isMoving) {
+        if (
+            !this.isAboveGround() &&
+            this.speedY === 0 &&
+            this.world?.audioHub &&
+            isMoving
+        ) {
             if (!this.isRunningSoundActive) {
                 this.world.audioHub.play("characterRun", 0.6);
                 this.isRunningSoundActive = true;
@@ -245,8 +266,10 @@ export class Character extends MovableObject {
         if (this.idleTime > 3000) {
             this.playLongIdleAnimation();
         } else if (this.idleTime > 1000) {
+            this.stopSnoring();
             this.playIdleAnimation();
         } else {
+            this.stopSnoring();
             this.loadImage("assets/img/character/walk/stehen.webp");
             this.currentImage = 0;
         }
@@ -256,7 +279,8 @@ export class Character extends MovableObject {
      * Plays the standard idle animation sequence.
      */
     playIdleAnimation() {
-        let index = Math.floor(this.idleTime / 200) % this.imageHub.images_idle.length;
+        let index =
+            Math.floor(this.idleTime / 200) % this.imageHub.images_idle.length;
         this.img = this.imageCache[this.imageHub.images_idle[index]];
     }
 
@@ -267,8 +291,15 @@ export class Character extends MovableObject {
         let maxIndex = this.imageHub.images_long_idle.length - 1;
         let calculatedIndex = Math.floor((this.idleTime - 3000) / 200);
         let index = Math.min(calculatedIndex, maxIndex);
-        
+
         this.img = this.imageCache[this.imageHub.images_long_idle[index]];
+
+        if (index === maxIndex) {
+            if (this.world?.audioHub && !this.isSnoringSoundActive) {
+                this.world.audioHub.play("character_snoring", 0.5);
+                this.isSnoringSoundActive = true;
+            }
+        }
     }
 
     /**
@@ -276,6 +307,7 @@ export class Character extends MovableObject {
      */
     jump() {
         this.speedY = 25;
+        this.stopSnoring();
         if (this.world?.audioHub) {
             this.world.audioHub.play("characterJump", 0.4);
         }

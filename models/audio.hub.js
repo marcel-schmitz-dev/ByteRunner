@@ -40,6 +40,9 @@ export class AudioHub {
             characterJump: new MyAudio("assets/audio/character_jump.mp3"),
             characterRun: new MyAudio("assets/audio/character_run.mp3"),
             enemiesDead: new MyAudio("assets/audio/enemies_dead.mp3"),
+            character_snoring: new MyAudio(
+                "assets/audio/character_snoring.mp3",
+            ),
             gameOverSound: new MyAudio("assets/audio/game_over_sound.mp3"),
             pickCoin: new MyAudio("assets/audio/pick_coin.mp3"),
             pickDisc: new MyAudio("assets/audio/pick_disc.mp3"),
@@ -52,6 +55,7 @@ export class AudioHub {
         this.sounds.bossLaufSound.file.loop = true;
         this.sounds.characterRun.file.loop = true;
         this.sounds.bossFightSound.file.loop = true;
+        this.sounds.character_snoring.file.loop = true;
 
         for (let key in this.sounds) {
             let soundObj = this.sounds[key];

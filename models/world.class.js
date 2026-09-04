@@ -112,16 +112,17 @@ export class World {
      * @param {Object} enemy - The endboss enemy instance.
      */
     activateBoss(enemy) {
-        enemy.world = this;
-        enemy.awakening();
-        this.bossSpawned = true;
+    if (this.bossSpawned) return;
+    
+    enemy.world = this;
+    enemy.awakening();
+    this.bossSpawned = true;
 
-        this.audioHub.stop("background");
-        this.audioHub.stop("backgroundSound");
-        this.audioHub.play("bossDetected", 0.4);
-        this.audioHub.play("bossFightSound", 0.3);
-        this.audioHub.play("bossLaufSound", 0.4);
-    }
+    this.audioHub.stop("background"); // Hier nur den Namen übergeben
+    this.audioHub.play("bossDetected", 0.4);
+    this.audioHub.play("bossFightSound", 0.3);
+    this.audioHub.play("bossLaufSound", 0.4);
+}
 
     /**
      * Checks and handles collisions between character and collectible items.
