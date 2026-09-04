@@ -3,7 +3,7 @@ import { ImageHub } from "./image.hub.js";
 
 /**
  * Represents the final boss of the game.
- * The boss can awaken, move toward the character, and play transformation, walk, or death animations.
+ * The boss can awaken, move toward the character, and play transformation, walk, hurt, or death animations.
  * @extends MovableObject
  */
 export class Endboss extends MovableObject {
@@ -38,6 +38,7 @@ export class Endboss extends MovableObject {
         this.loadImage("assets/img/boss/bossTransformation0.webp");
         this.loadImages(this.imageHub.images_boss_transformation);
         this.loadImages(this.imageHub.images_boss_walk);
+        this.loadImages(this.imageHub.images_boss_hurt);
         this.loadImages(this.imageHub.images_boss_dead);
 
         this.x = startX !== undefined ? startX : 3200;
@@ -103,10 +104,20 @@ export class Endboss extends MovableObject {
         setInterval(() => {
             if (this.isDead()) {
                 this.handleBossDeath();
+            } else if (this.isHurt()) {
+                this.handleBossHurt();
             } else if (this.isAwake) {
                 this.handleBossWalking();
             }
         }, 1000 / 10);
+    }
+
+    /**
+     * Displays the hurt image when the boss takes damage.
+     */
+    handleBossHurt() {
+        let path = this.imageHub.images_boss_hurt[0];
+        this.img = this.imageCache[path];
     }
 
     /**

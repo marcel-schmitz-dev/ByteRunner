@@ -23,7 +23,7 @@ export class AudioHub {
      */
     constructor() {
         this.isMuted = localStorage.getItem("byteRunner_muted") === "true";
-        
+
         this.sounds = {
             background: new MyAudio("assets/audio/background.mp3"),
             bossDead: new MyAudio("assets/audio/boss_dead.mp3"),
@@ -58,6 +58,26 @@ export class AudioHub {
             if (soundObj && soundObj.file) {
                 soundObj.file.muted = this.isMuted;
             }
+        }
+    }
+
+    play(soundName, volume = 1.0) {
+        if (this.isMuted) return;
+        let soundObj = this.sounds[soundName];
+        if (soundObj) {
+            soundObj.file.currentTime = 0;
+            soundObj.file.volume = volume;
+            soundObj.file.play().catch((e) => {
+                console.log("Audio play blocked or error:", e);
+            });
+        }
+    }
+
+    stop(soundName) {
+        let soundObj = this.sounds[soundName];
+        if (soundObj) {
+            soundObj.file.pause();
+            soundObj.file.currentTime = 0;
         }
     }
 

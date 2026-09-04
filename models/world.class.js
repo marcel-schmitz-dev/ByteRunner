@@ -56,6 +56,16 @@ export class World {
      */
     run() {
         setInterval(() => {
+            let endboss = this.level.enemies.find((e) => this.isEndboss(e));
+            if (endboss && endboss.isDead()) {
+                this.keyboard.LEFT = false;
+                this.keyboard.RIGHT = false;
+                this.keyboard.UP = false;
+                this.keyboard.SPACE = false;
+                this.keyboard.THROW = false;
+                return;
+            }
+
             this.checkCollisions();
             this.checkBossAwakening();
             this.checkCollectibles();

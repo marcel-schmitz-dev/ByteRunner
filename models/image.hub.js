@@ -156,6 +156,10 @@ export class ImageHub {
         "assets/img/boss/bossWalk8.webp",
     ];
 
+    images_boss_hurt = [
+    "assets/img/boss/bossHurt.webp"
+];
+
     /** @type {string[]} Image paths for the boss death animation. */
     images_boss_dead = [
         "assets/img/boss/bossDead0.webp",
