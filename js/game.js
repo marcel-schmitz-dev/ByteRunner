@@ -31,6 +31,9 @@ function init() {
     }
 
     window.world = world;
+
+    // Mobile Touch-Steuerung nach dem Laden der Welt initialisieren
+    initTouchControls();
 }
 
 /**
@@ -61,6 +64,42 @@ function handleKeyUp(e) {
 
 window.addEventListener("keydown", handleKeyDown);
 window.addEventListener("keyup", handleKeyUp);
+
+/**
+ * Initialisiert die Touch-Steuerung für mobile Geräte und Tablets.
+ */
+function initTouchControls() {
+    const bindTouchButton = (elementId, keyName) => {
+        const btn = document.getElementById(elementId);
+        if (!btn) return;
+
+        // Touch Start (Taste drücken)
+        btn.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            keyboard[keyName] = true;
+            btn.classList.add("active");
+        }, { passive: false });
+
+        // Touch End / Cancel (Taste loslassen)
+        btn.addEventListener("touchend", (e) => {
+            e.preventDefault();
+            keyboard[keyName] = false;
+            btn.classList.remove("active");
+        }, { passive: false });
+
+        btn.addEventListener("touchcancel", (e) => {
+            e.preventDefault();
+            keyboard[keyName] = false;
+            btn.classList.remove("active");
+        }, { passive: false });
+    };
+
+    // Verknüpfe die HTML-Buttons mit den Keyboard-Properties
+    bindTouchButton("btn-left", "LEFT");
+    bindTouchButton("btn-right", "RIGHT");
+    bindTouchButton("btn-jump", "UP");    // Springen (wie Pfeil Oben / W)
+    bindTouchButton("btn-throw", "THROW"); // Werfen (wie Taste L)
+}
 
 /**
  * Toggles global audio mute state and updates the UI button.
@@ -198,7 +237,7 @@ function setupAudioPlayback(countdownDiv) {
         setTimeout(hideStartScreen, 4000);
         return;
     }
-    sound.file.volume = 0.6;
+    sound.file.volume = 0.5;
     sound.file.currentTime = 0;
     sound.file.onended = hideStartScreen;
     sound.file.play().catch(() => hideStartScreen());

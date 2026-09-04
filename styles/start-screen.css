@@ -9,11 +9,6 @@
         url("../assets/img/background/background.webp");
     background-size: cover;
     background-position: center;
-    border: 4px solid #000000;
-    box-shadow:
-        -15px 0 30px rgba(0, 255, 255, 0.4),
-        15px 0 30px rgba(255, 0, 128, 0.4),
-        0 0 25px rgba(0, 0, 0, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -25,9 +20,9 @@
 
 .menu-content {
     text-align: center;
-    width: 85%;
-    max-width: 400px;
-    transform: scale(clamp(0.6, 1vw + 0.4rem, 1));
+    width: 90%;
+    max-width: 350px;
+    transform: scale(clamp(0.65, 1.2vh + 0.2rem, 0.95));
     transform-origin: center center;
 }
 
@@ -52,9 +47,13 @@
 }
 
 .btn {
-    background: transparent;
+    background: rgba(13, 13, 21, 0.4);
     border: 3px solid #000000;
-    color: #00ffff;
+
+    background-image: linear-gradient(90deg, #00ffff, #ff0080);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
     padding: 10px 20px;
     font-family: "Orbitron", sans-serif;
     font-size: clamp(0.9rem, 2vw, 1.1rem);
@@ -70,6 +69,8 @@
 
 .btn:hover {
     background: linear-gradient(90deg, #00ffff, #ff0080);
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
     color: #0f0f19;
     transform: scale(1.03);
     border: 3px solid #000000;
@@ -123,7 +124,7 @@
     border: none;
     padding: 12px 30px;
     font-size: 18px;
-    font-family: 'Orbitron', sans-serif;
+    font-family: "Orbitron", sans-serif;
     font-weight: bold;
     cursor: pointer;
     text-transform: uppercase;
@@ -135,6 +136,8 @@
 
 .cyber-btn:hover {
     filter: brightness(1.2);
-    box-shadow: 0 0 25px rgba(0, 255, 255, 0.7), 0 0 25px rgba(255, 0, 128, 0.7);
+    box-shadow:
+        0 0 25px rgba(0, 255, 255, 0.7),
+        0 0 25px rgba(255, 0, 128, 0.7);
     transform: scale(1.05);
 }

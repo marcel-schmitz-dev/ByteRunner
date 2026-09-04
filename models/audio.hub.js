@@ -24,7 +24,6 @@ export class AudioHub {
     constructor() {
         this.isMuted = false;
         this.sounds = {
-            backgroundSound: new MyAudio("assets/audio/background_sound.mp3"),
             background: new MyAudio("assets/audio/background.mp3"),
             bossDead: new MyAudio("assets/audio/boss_dead.mp3"),
             bossDetected: new MyAudio("assets/audio/boss_detected.mp3"),
@@ -49,7 +48,6 @@ export class AudioHub {
         };
 
         this.sounds.background.file.loop = true;
-        this.sounds.backgroundSound.file.loop = true;
         this.sounds.bossLaufSound.file.loop = true;
         this.sounds.characterRun.file.loop = true;
         this.sounds.bossFightSound.file.loop = true;

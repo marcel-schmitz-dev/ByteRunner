@@ -1,0 +1,115 @@
+html,
+body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    position: fixed;
+}
+
+.portrait-warning-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #0a0a12;
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #fff;
+    font-family: "Orbitron", sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.warning-content h2 {
+    color: #ff0080;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(255, 0, 128, 0.6);
+}
+
+.warning-content p {
+    color: #00ffff;
+    font-size: 0.9rem;
+}
+
+@media screen and (max-width: 1024px) and (orientation: portrait) and (pointer: coarse) {
+    .portrait-warning-overlay {
+        display: flex;
+    }
+}
+
+.mobile-controls {
+    display: none;
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 100%;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-sizing: border-box;
+    z-index: 200;
+    pointer-events: none;
+}
+
+@media screen and (max-width: 1400px) and (orientation: landscape) {
+    @media (pointer: coarse), (hover: none) {
+        .mobile-controls {
+            display: flex;
+        }
+    }
+}
+
+.control-group-left,
+.control-group-right {
+    display: flex;
+    gap: 15px;
+    pointer-events: auto;
+}
+
+.touch-btn {
+    width: 65px;
+    height: 65px;
+    background: rgba(13, 13, 21, 0.25);
+    border: 2px solid #00ffff;
+
+    background-image: linear-gradient(90deg, #00ffff, #ff0080);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.85rem;
+    font-weight: bold;
+    border-radius: 16px;
+    box-shadow:
+        0 0 10px rgba(0, 255, 255, 0.2),
+        inset 0 0 5px rgba(0, 0, 0, 0.4);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    -webkit-user-select: none;
+    outline: none;
+    touch-action: manipulation;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.touch-btn:active,
+.touch-btn.active {
+    background: linear-gradient(90deg, #00ffff, #ff0080);
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+    border-color: #fff;
+    color: #0a0a12;
+    box-shadow:
+        0 0 20px rgba(255, 0, 128, 0.8),
+        0 0 10px rgba(0, 255, 255, 0.8);
+    transform: scale(0.93);
+}
