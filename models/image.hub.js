@@ -62,6 +62,22 @@ export class ImageHub {
         "assets/img/character/jump/jump4.webp",
     ];
 
+    /** @type {string[]} Image paths for the hero's idle animation. */
+    images_idle = [
+        "assets/img/character/idle/idle0.webp",
+        "assets/img/character/idle/idle1.webp",
+        "assets/img/character/idle/idle2.webp",
+        "assets/img/character/idle/idle3.webp",
+    ];
+
+    /** @type {string[]} Image paths for the hero's long idle animation. */
+    images_long_idle = [
+        "assets/img/character/longIdle/longIdle0.webp",
+        "assets/img/character/longIdle/longIdle1.webp",
+        "assets/img/character/longIdle/longIdle2.webp",
+        "assets/img/character/longIdle/longIdle3.webp",
+    ];
+
     /** @type {string[]} Image paths for the hero's hurt animation. */
     images_hurt = [
         "assets/img/character/dead/dead0.webp",

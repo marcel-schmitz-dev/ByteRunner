@@ -19,6 +19,7 @@ export class Character extends MovableObject {
     deadAnimationStarted = false;
     isGameOverPlayed = false;
     isBouncing = false;
+    idleTime = 0;
 
     /**
      * Creates a new character instance and initializes its resources, gravity, and animation loops.
@@ -41,6 +42,8 @@ export class Character extends MovableObject {
         this.loadImages(this.imageHub.images_jumping);
         this.loadImages(this.imageHub.images_hurt);
         this.loadImages(this.imageHub.images_dead);
+        this.loadImages(this.imageHub.images_idle);
+        this.loadImages(this.imageHub.images_long_idle);
     }
 
     /**
@@ -136,7 +139,7 @@ export class Character extends MovableObject {
         if (!this.deadAnimationStarted) {
             this.deadAnimationStarted = true;
             this.currentImage = 0;
-            this.scheduleGameOverScreen(); // Hier wird der Game-Over-Screen getriggert
+            this.scheduleGameOverScreen();
         }
         let index = Math.min(
             this.currentImage,
@@ -192,32 +195,80 @@ export class Character extends MovableObject {
     }
 
     /**
-     * Manages walking states with audio or fallback to idle stance.
+     * Manages walking states, normal idle stance, and transitions to long idle animations.
      */
     handleWalkingOrIdleAnimation() {
         if (this.world?.keyboard.RIGHT || this.world?.keyboard.LEFT) {
+            this.resetIdleState();
             let index = this.currentImage % this.imageHub.images_walking.length;
             this.img = this.imageCache[this.imageHub.images_walking[index]];
             this.currentImage++;
-            if (
-                !this.isAboveGround() &&
-                this.speedY === 0 &&
-                this.world?.audioHub
-            ) {
-                if (!this.isRunningSoundActive) {
-                    this.world.audioHub.play("characterRun", 0.6);
-                    this.isRunningSoundActive = true;
-                }
-            } else {
-                this.world?.audioHub?.stop("characterRun");
-                this.isRunningSoundActive = false;
+            this.handleRunningAudio(true);
+        } else {
+            this.handleIdleState();
+        }
+    }
+
+    /**
+     * Resets the idle timer and stops running audio.
+     */
+    resetIdleState() {
+        this.idleTime = 0;
+        this.world?.audioHub?.stop("characterRun");
+        this.isRunningSoundActive = false;
+    }
+
+    /**
+     * Handles audio state during movement.
+     * @param {boolean} isMoving - Whether the character is moving.
+     */
+    handleRunningAudio(isMoving) {
+        if (!this.isAboveGround() && this.speedY === 0 && this.world?.audioHub && isMoving) {
+            if (!this.isRunningSoundActive) {
+                this.world.audioHub.play("characterRun", 0.6);
+                this.isRunningSoundActive = true;
             }
         } else {
-            this.loadImage("assets/img/character/walk/stehen.webp");
-            this.currentImage = 0;
             this.world?.audioHub?.stop("characterRun");
             this.isRunningSoundActive = false;
         }
+    }
+
+    /**
+     * Manages idle and long idle animations based on inactivity duration.
+     */
+    handleIdleState() {
+        this.world?.audioHub?.stop("characterRun");
+        this.isRunningSoundActive = false;
+        this.idleTime += 1000 / 12;
+
+        if (this.idleTime > 3000) {
+            this.playLongIdleAnimation();
+        } else if (this.idleTime > 1000) {
+            this.playIdleAnimation();
+        } else {
+            this.loadImage("assets/img/character/walk/stehen.webp");
+            this.currentImage = 0;
+        }
+    }
+
+    /**
+     * Plays the standard idle animation sequence.
+     */
+    playIdleAnimation() {
+        let index = Math.floor(this.idleTime / 200) % this.imageHub.images_idle.length;
+        this.img = this.imageCache[this.imageHub.images_idle[index]];
+    }
+
+    /**
+     * Plays the long idle animation sequence and stays on the last frame until movement resumes.
+     */
+    playLongIdleAnimation() {
+        let maxIndex = this.imageHub.images_long_idle.length - 1;
+        let calculatedIndex = Math.floor((this.idleTime - 3000) / 200);
+        let index = Math.min(calculatedIndex, maxIndex);
+        
+        this.img = this.imageCache[this.imageHub.images_long_idle[index]];
     }
 
     /**
