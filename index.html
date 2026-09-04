@@ -18,11 +18,8 @@
         <h1>ByteRunner</h1>
 
         <div id="game-container">
-            <canvas
-                id="canvas"
-                height="480"
-                width="720"
-            ></canvas>
+            <button id="mute-btn" onclick="toggleMute()">SOUND: ON</button>
+            <canvas id="canvas" height="480" width="720"></canvas>
 
             <div id="start-screen" class="start-screen">
                 <div class="menu-content">
@@ -47,9 +44,16 @@
                     </div>
                 </div>
 
-                <div id="controls-modal" class="modal hidden">
-                    <div class="modal-content">
-                        <h2>Steuerung</h2>
+                <div
+                    id="controls-modal"
+                    class="modal hidden"
+                    onclick="closeModalOnOutsideClick(event, 'controls-modal')"
+                >
+                    <div
+                        class="modal-content"
+                        onclick="event.stopPropagation()"
+                    >
+                        <h2>Steuerung & Gameplay</h2>
                         <ul class="controls-list">
                             <li>
                                 <span>Bewegen Links/Rechts</span>
@@ -63,18 +67,40 @@
                                 <span>Werfen (Disc)</span>
                                 <span>Taste L</span>
                             </li>
+                            <li>
+                                <span>Gegner besiegen</span>
+                                <span>Auf den Kopf springen</span>
+                            </li>
+                            <li>
+                                <span>Discs einsammeln</span>
+                                <span>Drüber laufen</span>
+                            </li>
+                            <li>
+                                <span>Boss bekämpfen</span>
+                                <span
+                                    >Discs einsammeln und mit L auf ihn
+                                    werfen</span
+                                >
+                            </li>
                         </ul>
                         <button
                             class="btn-close"
-                            onclick="toggleModal('controls-modal')"
+                            onclick="closeModal('controls-modal')"
                         >
                             Schließen
                         </button>
                     </div>
                 </div>
 
-                <div id="imprint-modal" class="modal hidden">
-                    <div class="modal-content">
+                <div
+                    id="imprint-modal"
+                    class="modal hidden"
+                    onclick="closeModalOnOutsideClick(event, 'imprint-modal')"
+                >
+                    <div
+                        class="modal-content"
+                        onclick="event.stopPropagation()"
+                    >
                         <h2>Impressum</h2>
                         <p>Angaben gemäß § 5 TMG</p>
                         <p>Marcel Schmitz<br />Entwickler & Inhaber</p>
@@ -85,14 +111,22 @@
                             >
                         </p>
                         <p>
-                            <strong>Bild- und Icon-Hinweis:</strong><br />
+                            <strong>Bild-, Icon- und Sound-Hinweise:</strong
+                            ><br />
                             Alle verwendeten Icons und Grafiken sind
-                            KI-generiert und wurden mit ChatGPT erstellt.
+                            KI-generiert und wurden mit ChatGPT erstellt.<br />
+                            Alle Soundeffekte und Audio-Dateien stammen von
+                            <a
+                                href="https://pixabay.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                >pixabay.com</a
+                            >.
                         </p>
                         <p>© 2026 Marcel Schmitz. Alle Rechte vorbehalten.</p>
                         <button
                             class="btn-close"
-                            onclick="toggleModal('imprint-modal')"
+                            onclick="closeModal('imprint-modal')"
                         >
                             Schließen
                         </button>
@@ -100,22 +134,26 @@
                 </div>
             </div>
         </div>
-        
-<div id="game-over-screen" class="game-overlay hidden">
-    <div class="overlay-content">
-        <h2>SYSTEM FAILURE</h2>
-        <p>CHARACTER TERMINATED</p>
-        <button onclick="restartGame()" class="cyber-btn">RESTART</button>
-    </div>
-</div>
 
-<div id="win-screen" class="game-overlay hidden">
-    <div class="overlay-content">
-        <h2>MISSION ACCOMPLISHED</h2>
-        <p>CYBERPUNK BOSS ELIMINATED</p>
-        <button onclick="restartGame()" class="cyber-btn">RESTART</button>
-    </div>
-</div>
+        <div id="game-over-screen" class="game-overlay hidden">
+            <div class="overlay-content">
+                <h2>SYSTEM FAILURE</h2>
+                <p>CHARACTER TERMINATED</p>
+                <button onclick="restartGame()" class="cyber-btn">
+                    RESTART
+                </button>
+            </div>
+        </div>
+
+        <div id="win-screen" class="game-overlay hidden">
+            <div class="overlay-content">
+                <h2>MISSION ACCOMPLISHED</h2>
+                <p>CYBERPUNK BOSS ELIMINATED</p>
+                <button onclick="restartGame()" class="cyber-btn">
+                    RESTART
+                </button>
+            </div>
+        </div>
 
         <script type="module" src="js/game.js"></script>
     </body>

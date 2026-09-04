@@ -15,13 +15,14 @@ class MyAudio {
 
 /**
  * Centralizes the audio resources used by the application and provides
- * methods for controlling their playback.
+ * methods for controlling their playback and global mute state.
  */
 export class AudioHub {
     /**
      * Creates an audio hub and initializes all available sound resources.
      */
     constructor() {
+        this.isMuted = false;
         this.sounds = {
             backgroundSound: new MyAudio("assets/audio/background_sound.mp3"),
             background: new MyAudio("assets/audio/background.mp3"),
@@ -57,7 +58,7 @@ export class AudioHub {
     /**
      * Plays a registered sound from the beginning at the specified volume.
      *
-     * If playback is blocked by the browser or otherwise fails, the error is
+     * If playback is blocked by the browser, muted, or otherwise fails, the error is
      * logged to the console. Unknown sound names are ignored.
      *
      * @param {string} soundName - The name of the sound to play.
@@ -65,6 +66,7 @@ export class AudioHub {
      * @returns {void}
      */
     play(soundName, volume = 1.0) {
+        if (this.isMuted) return;
         let soundObj = this.sounds[soundName];
         if (soundObj) {
             soundObj.file.currentTime = 0;
@@ -89,5 +91,21 @@ export class AudioHub {
             soundObj.file.pause();
             soundObj.file.currentTime = 0;
         }
+    }
+
+    /**
+     * Toggles the global mute state for all preloaded audio assets.
+     *
+     * @returns {boolean} The updated mute status.
+     */
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        for (let key in this.sounds) {
+            let soundObj = this.sounds[key];
+            if (soundObj && soundObj.file) {
+                soundObj.file.muted = this.isMuted;
+            }
+        }
+        return this.isMuted;
     }
 }

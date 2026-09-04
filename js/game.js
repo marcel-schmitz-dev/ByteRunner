@@ -6,6 +6,7 @@ let canvas;
 let world;
 let keyboard = new Keyboard();
 let isStarting = false;
+let globalAudioHub = new AudioHub();
 
 /**
  * Initializes the canvas element and starts the game world instance.
@@ -17,6 +18,18 @@ function init() {
         return;
     }
     world = new World(canvas, keyboard);
+
+    // Übernehme den Mute-Zustand, falls vor dem Start gemuted wurde
+    if (globalAudioHub.isMuted) {
+        world.audioHub.isMuted = true;
+        for (let key in world.audioHub.sounds) {
+            let soundObj = world.audioHub.sounds[key];
+            if (soundObj && soundObj.file) {
+                soundObj.file.muted = true;
+            }
+        }
+    }
+
     window.world = world;
 }
 
@@ -50,6 +63,35 @@ window.addEventListener("keydown", handleKeyDown);
 window.addEventListener("keyup", handleKeyUp);
 
 /**
+ * Toggles global audio mute state and updates the UI button.
+ */
+window.toggleMute = function () {
+    let isMuted;
+    if (window.world && window.world.audioHub) {
+        isMuted = window.world.audioHub.toggleMute();
+    } else {
+        isMuted = globalAudioHub.toggleMute();
+    }
+    updateMuteButtonUI(isMuted);
+};
+
+/**
+ * Updates the visual styling and text of the mute button.
+ * @param {boolean} isMuted - The current mute status.
+ */
+function updateMuteButtonUI(isMuted) {
+    let btn = document.getElementById("mute-btn");
+    if (!btn) return;
+    if (isMuted) {
+        btn.innerHTML = "SOUND: OFF";
+        btn.classList.add("muted");
+    } else {
+        btn.innerHTML = "SOUND: ON";
+        btn.classList.remove("muted");
+    }
+}
+
+/**
  * Toggles the visibility of a modal element by its ID.
  * @param {string} modalId - The ID of the modal element.
  */
@@ -57,6 +99,29 @@ window.toggleModal = function (modalId) {
     let modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.toggle("hidden");
+    }
+};
+
+/**
+ * Closes a specific modal by its ID.
+ * @param {string} modalId - The ID of the modal element.
+ */
+window.closeModal = function (modalId) {
+    let modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add("hidden");
+    }
+};
+
+/**
+ * Closes the modal if clicked on the outer background overlay.
+ * @param {MouseEvent} event - The click event.
+ * @param {string} modalId - The ID of the modal element.
+ */
+window.closeModalOnOutsideClick = function (event, modalId) {
+    let modal = document.getElementById(modalId);
+    if (event.target === modal) {
+        closeModal(modalId);
     }
 };
 
@@ -127,8 +192,8 @@ function runCountdownVisuals(countdownDiv) {
  * @param {HTMLElement} countdownDiv - The countdown element.
  */
 function setupAudioPlayback(countdownDiv) {
-    let sound = new AudioHub().sounds["startSoundCountdown"];
-    if (!sound?.file) {
+    let sound = globalAudioHub.sounds["startSoundCountdown"];
+    if (!sound?.file || globalAudioHub.isMuted) {
         runCountdownVisuals(countdownDiv);
         setTimeout(hideStartScreen, 4000);
         return;
