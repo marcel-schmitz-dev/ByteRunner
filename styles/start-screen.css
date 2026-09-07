@@ -16,56 +16,65 @@
     font-family: "JetBrains Mono", monospace;
     box-sizing: border-box;
     overflow: hidden;
+    padding: 1rem;
 }
 
 .menu-content {
     text-align: center;
-    width: 90%;
-    max-width: 350px;
-    transform: scale(clamp(0.65, 1.2vh + 0.2rem, 0.95));
-    transform-origin: center center;
+    width: 100%;
+    max-width: 320px; /* Kompakter, damit es nicht zu breit wird */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .game-title {
     font-family: "Orbitron", sans-serif;
-    font-size: clamp(1.5rem, 5vw, 2.8rem);
+    font-size: clamp(1.4rem, 4.5vw, 2.5rem);
     font-weight: bold;
-    margin-bottom: 25px;
+    margin-bottom: 1.2rem;
     background: linear-gradient(90deg, #00ffff, #ff0080);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-    white-space: nowrap;
-    max-width: 100%;
+    width: 100%;
     box-sizing: border-box;
 }
 
 .menu-buttons {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     width: 100%;
-    max-width: 240px;
+    /* Wichtig: Keine feste max-width erzwingen, die Buttons sollen sich perfekt einfügen */
+    align-items: stretch; /* Lässt alle Buttons gleich breit im Container sein, aber passend */
+    max-width: 220px; /* Reduziert die maximale Breite der Button-Leiste */
     margin: 0 auto;
 }
 
 .btn {
     background: rgba(13, 13, 21, 0.4);
-    border: 3px solid #000000;
+    border: 2px solid #000000; /* Etwas feinerer Rand bei kleinen Bildschirmen */
     background-image: linear-gradient(90deg, #00ffff, #ff0080);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    padding: 10px 20px;
+
+    /* Dynamisches Padding, das mit der Schriftgröße skaliert */
+    padding: clamp(8px, 1.5vh, 12px) clamp(12px, 3vw, 20px);
+
     font-family: "Orbitron", sans-serif;
-    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    font-size: clamp(0.75rem, 2.2vw, 1rem); /* Schützt vor zu großen Knöpfen */
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
+    box-sizing: border-box;
+    white-space: nowrap; /* Verhindert hässliches Umbrechen im Button */
+
     box-shadow:
         0 0 0 1px rgba(255, 255, 255, 0.15),
-        -8px 0 20px rgba(0, 255, 255, 0.4),
-        8px 0 20px rgba(255, 0, 128, 0.4),
-        0 0 10px rgba(0, 0, 0, 0.8);
+        -4px 0 12px rgba(0, 255, 255, 0.3),
+        4px 0 12px rgba(255, 0, 128, 0.3),
+        0 0 8px rgba(0, 0, 0, 0.8);
 }
 
 .btn:hover {
@@ -73,15 +82,16 @@
     -webkit-background-clip: initial;
     -webkit-text-fill-color: initial;
     color: #0f0f19;
-    transform: scale(1.03);
-    border: 3px solid #000000;
+    transform: scale(1.02);
+    border: 2px solid #000000;
     box-shadow:
         0 0 0 1px rgba(255, 255, 255, 0.3),
-        -12px 0 25px rgba(0, 255, 255, 0.7),
-        12px 0 25px rgba(255, 0, 128, 0.7),
-        0 0 15px rgba(0, 0, 0, 0.9);
+        -8px 0 18px rgba(0, 255, 255, 0.6),
+        8px 0 18px rgba(255, 0, 128, 0.6),
+        0 0 12px rgba(0, 0, 0, 0.9);
 }
 
+/* Anpassungen für die Overlays (Game Over / Win Screen) falls dort das gleiche Problem auftritt */
 .game-overlay {
     position: fixed;
     top: 0;
@@ -94,6 +104,8 @@
     align-items: center;
     z-index: 1000;
     font-family: "Orbitron", sans-serif;
+    padding: 1rem;
+    box-sizing: border-box;
 }
 
 .game-overlay.hidden {
@@ -103,19 +115,21 @@
 .overlay-content {
     text-align: center;
     color: #fff;
+    width: 100%;
+    max-width: 400px;
 }
 
 .overlay-content h2 {
-    font-size: clamp(30px, 5vw, 60px);
+    font-size: clamp(1.5rem, 4vw, 2.8rem);
     color: #ff0080;
     text-shadow: 0 0 20px rgba(255, 0, 128, 0.6);
     margin-bottom: 10px;
 }
 
 .overlay-content p {
-    font-size: clamp(16px, 2vw, 24px);
+    font-size: clamp(0.9rem, 2vw, 1.2rem);
     color: #00ffff;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     letter-spacing: 2px;
 }
 
@@ -123,14 +137,13 @@
     background: linear-gradient(90deg, #00ffff, #ff0080);
     color: #0a0a14;
     border: none;
-    padding: 12px 30px;
-    font-size: 18px;
+    padding: clamp(8px, 1.5vh, 12px) clamp(20px, 4vw, 30px);
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
     font-family: "Orbitron", sans-serif;
     font-weight: bold;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 2px;
-    position: relative;
     transition: all 0.3s ease;
     box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
 }
