@@ -7,6 +7,46 @@ import { Cloud } from "../models/cloud.class.js";
 import { MovableObject } from "../models/movable-objects.class.js";
 import { DrawableObject } from "../models/drawable-object.class.js";
 import { ImageHub } from "../models/image.hub.js";
+import { IntervalHub } from "../models/interval-hub.class.js";
+
+const BACKGROUND_IMAGE_PATHS = [
+    "assets/img/background/background0.webp",
+    "assets/img/background/background.webp",
+    "assets/img/background/background0.webp",
+    "assets/img/background/background.webp",
+    "assets/img/background/background.webp",
+    "assets/img/background/background0.webp",
+    "assets/img/background/background.webp",
+    "assets/img/background/background0.webp",
+];
+
+const ENEMY_SPAWNS = [
+    [MouseDrone, 500],
+    [HardDrive, 700],
+    [MouseDrone, 900],
+    [HardDrive, 1100],
+    [MouseDrone, 1300],
+    [HardDrive, 1500],
+    [MouseDrone, 1700],
+    [HardDrive, 1900],
+    [MouseDrone, 2100],
+    [HardDrive, 2300],
+    [MouseDrone, 2500],
+    [HardDrive, 2700],
+    [MouseDrone, 2900],
+    [HardDrive, 3050],
+    [Endboss, 4000],
+];
+
+const CLOUD_POSITIONS = [500, 1000, 1500, 2000, 2500, 3000, 3500];
+const COIN_POSITIONS = [
+    [250, 340], [500, 300], [750, 350], [1000, 300], [1250, 340],
+    [1500, 300], [1750, 350], [2000, 300], [2200, 340], [2400, 300],
+];
+const DISC_POSITIONS = [
+    [350, 340], [650, 340], [950, 340], [1150, 340], [1400, 340],
+    [1650, 340], [1900, 340], [2100, 340], [2300, 340], [2450, 340],
+];
 
 /**
  * Represents a collectible data disc item in the level.
@@ -74,7 +114,7 @@ export class Coin extends DrawableObject {
      * Starts the animation loop for the coin.
      */
     animate() {
-        setInterval(() => {
+        IntervalHub.start(() => {
             let i = this.currentImage % this.imageHub.images_coin.length;
             let path = this.imageHub.images_coin[i];
             this.img = this.imageCache[path];
@@ -88,65 +128,37 @@ export class Coin extends DrawableObject {
  * @returns {Level} A new level instance.
  */
 export function initLevel1() {
+    BackgroundObject.resetPositions();
     return new Level(
-        [
-            new BackgroundObject("assets/img/background/background0.webp", -720, 0),
-            new BackgroundObject("assets/img/background/background.webp", 0, 0),
-            new BackgroundObject("assets/img/background/background0.webp", 719, 0),
-            new BackgroundObject("assets/img/background/background.webp", 1439, 0),
-            new BackgroundObject("assets/img/background/background0.webp", 2159, 0),
-            new BackgroundObject("assets/img/background/background.webp", 2879, 0),
-            new BackgroundObject("assets/img/background/background0.webp", 3599, 0),
-        ],
-        [
-            new MouseDrone(),
-            new MouseDrone(),
-            new MouseDrone(),
-            new MouseDrone(),
-            new MouseDrone(),
-            new MouseDrone(),
-            new MouseDrone(),
-            new HardDrive(),
-            new HardDrive(),
-            new HardDrive(),
-            new HardDrive(),
-            new HardDrive(),
-            new HardDrive(),
-            new HardDrive(),
-            new Endboss(3200),
-        ],
-        [
-            new Cloud(500),
-            new Cloud(1000),
-            new Cloud(1500),
-            new Cloud(2000),
-            new Cloud(2500),
-            new Cloud(3000),
-            new Cloud(3500),
-        ],
-        [
-            new Coin(250, 340),
-            new Coin(500, 300),
-            new Coin(750, 350),
-            new Coin(1000, 300),
-            new Coin(1250, 340),
-            new Coin(1500, 300),
-            new Coin(1750, 350),
-            new Coin(2000, 300),
-            new Coin(2200, 340),
-            new Coin(2400, 300),
-        ],
-        [
-            new CollectibleDisc(350, 340),
-            new CollectibleDisc(650, 340),
-            new CollectibleDisc(950, 340),
-            new CollectibleDisc(1150, 340),
-            new CollectibleDisc(1400, 340),
-            new CollectibleDisc(1650, 340),
-            new CollectibleDisc(1900, 340),
-            new CollectibleDisc(2100, 340),
-            new CollectibleDisc(2300, 340),
-            new CollectibleDisc(2450, 340),
-        ]
+        createBackgrounds(),
+        createEnemies(),
+        createClouds(),
+        createCoins(),
+        createDiscs(),
     );
+}
+
+/** @returns {BackgroundObject[]} Background objects for the level. */
+function createBackgrounds() {
+    return BACKGROUND_IMAGE_PATHS.map((imagePath) => new BackgroundObject(imagePath));
+}
+
+/** @returns {MovableObject[]} Enemies for the level. */
+function createEnemies() {
+    return ENEMY_SPAWNS.map(([EnemyType, position]) => new EnemyType(position));
+}
+
+/** @returns {Cloud[]} Clouds for the level. */
+function createClouds() {
+    return CLOUD_POSITIONS.map((position) => new Cloud(position));
+}
+
+/** @returns {Coin[]} Coins for the level. */
+function createCoins() {
+    return COIN_POSITIONS.map(([x, y]) => new Coin(x, y));
+}
+
+/** @returns {CollectibleDisc[]} Collectible discs for the level. */
+function createDiscs() {
+    return DISC_POSITIONS.map(([x, y]) => new CollectibleDisc(x, y));
 }

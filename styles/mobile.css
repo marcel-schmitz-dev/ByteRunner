@@ -63,7 +63,7 @@ body {
 
 @media screen and (max-width: 1400px) and (orientation: landscape) {
     @media (pointer: coarse), (hover: none) {
-        .mobile-controls {
+        body.game-active .mobile-controls {
             display: flex;
         }
     }
@@ -99,6 +99,9 @@ body {
     align-items: center;
     user-select: none;
     -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-drag: none;
     outline: none;
     touch-action: none;
     -webkit-touch-callout: none;

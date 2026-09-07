@@ -1,5 +1,6 @@
 import { MovableObject } from "./movable-objects.class.js";
 import { ImageHub } from "./image.hub.js";
+import { IntervalHub } from "./interval-hub.class.js";
 
 /**
  * Represents a flying mouse drone enemy in the game world.
@@ -13,21 +14,14 @@ export class MouseDrone extends MovableObject {
     /**
      * Initializes a new instance of the MouseDrone class.
      */
-    constructor() {
+    constructor(startX, speed = 0.2) {
         super();
         this.loadImage("assets/img/monster/mouseDrone0.webp");
         this.loadImages(this.imageHub.images_mouse_drone);
-        this.animate();
-        this.setRandomPosition();
-    }
-
-    /**
-     * Assigns random starting coordinates and movement speed.
-     */
-    setRandomPosition() {
-        this.x = 450 + Math.random() * 2000;
-        this.speed = 0.15 + Math.random() * 0.25;
+        this.x = startX;
+        this.speed = speed;
         this.y = 380;
+        this.animate();
     }
 
     /**
@@ -42,8 +36,8 @@ export class MouseDrone extends MovableObject {
      * Moves the drone continuously to the left.
      */
     moveLeft() {
-        setInterval(() => {
-            this.x -= 0.15;
+        IntervalHub.start(() => {
+            this.x -= this.speed;
         }, 1000 / 60);
     }
 
@@ -51,7 +45,7 @@ export class MouseDrone extends MovableObject {
      * Cycles through animation frames for the drone's flight sequence.
      */
     startAnimationLoop() {
-        setInterval(() => {
+        IntervalHub.start(() => {
             let index = this.currentImage % this.imageHub.images_mouse_drone.length;
             let path = this.imageHub.images_mouse_drone[index];
             this.img = this.imageCache[path];

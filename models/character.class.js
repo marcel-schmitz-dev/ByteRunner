@@ -1,5 +1,6 @@
 import { MovableObject } from "./movable-objects.class.js";
 import { ImageHub } from "./image.hub.js";
+import { IntervalHub } from "./interval-hub.class.js";
 
 /**
  * Represents the playable character, controlling movement, animations, jumping behavior, and audio effects.
@@ -14,11 +15,9 @@ export class Character extends MovableObject {
     discs = 0;
 
     imageHub = new ImageHub();
-    currentImage = 0;
     world;
     deadAnimationStarted = false;
     isGameOverPlayed = false;
-    isBouncing = false;
     idleTime = 0;
     isSnoringSoundActive = false;
     isGameWon = false;
@@ -33,12 +32,9 @@ export class Character extends MovableObject {
         this.loadCharacterImages();
         this.applyGravity();
         this.animate();
-        this.lastActionTime = new Date().getTime();
     }
 
-    /**
-     * Loads all necessary image assets for the character.
-     */
+    /** Loads all required character images. */
     loadCharacterImages() {
         this.loadImage("assets/img/character/walk/stehen.webp");
         this.loadImages(this.imageHub.images_walking);
@@ -73,9 +69,7 @@ export class Character extends MovableObject {
         }
     }
 
-    /**
-     * Starts the movement and animation intervals for the character.
-     */
+    /** Starts the character movement and animation intervals. */
     animate() {
         this.startMovementInterval();
         this.startAnimationInterval();
@@ -85,19 +79,12 @@ export class Character extends MovableObject {
      * Handles keyboard inputs for moving left, right, jumping, and camera tracking.
      */
     startMovementInterval() {
-        setInterval(() => {
-            this.handleHorizontalMovement();
+        IntervalHub.start(() => {
+            this.handleRightMovement();
+            this.handleLeftMovement();
             this.handleVerticalMovement();
             this.updateCameraPosition();
         }, 1000 / 60);
-    }
-
-    /**
-     * Processes left and right movement flags based on keyboard input.
-     */
-    handleHorizontalMovement() {
-        this.handleRightMovement();
-        this.handleLeftMovement();
     }
 
     /**
@@ -110,7 +97,6 @@ export class Character extends MovableObject {
         ) {
             this.x += this.speed;
             this.otherDirection = false;
-            this.lastActionTime = new Date().getTime();
         }
     }
 
@@ -121,16 +107,12 @@ export class Character extends MovableObject {
         if (this.world?.keyboard.LEFT && this.x > 0) {
             this.x -= this.speed;
             this.otherDirection = true;
-            this.lastActionTime = new Date().getTime();
         }
     }
 
-    /**
-     * Triggers a jump if the up key is pressed and the character is grounded.
-     */
     handleVerticalMovement() {
         if (
-            this.world?.keyboard.UP &&
+            this.world?.keyboard.SPACE &&
             !this.isAboveGround() &&
             this.speedY === 0
         ) {
@@ -151,7 +133,7 @@ export class Character extends MovableObject {
      * Cycles through animation frames depending on the current character state.
      */
     startAnimationInterval() {
-        setInterval(() => {
+        IntervalHub.start(() => {
             if (this.handleDeadAnimation()) return;
             if (this.handleHurtAnimation()) return;
             if (this.handleJumpingAnimation()) return;
@@ -349,9 +331,9 @@ export class Character extends MovableObject {
      * Selects and plays idle animations based on accumulated idle time.
      */
     handleIdleAnimationsByTime() {
-        if (this.idleTime > 4000) {
+        if (this.idleTime > 5000) {
             this.playLongIdleAnimation();
-        } else if (this.idleTime > 2000) {
+        } else if (this.idleTime > 3000) {
             this.stopSnoring();
             this.playIdleAnimation();
         } else {
@@ -373,7 +355,7 @@ export class Character extends MovableObject {
      */
     playIdleAnimation() {
         let index =
-            Math.floor((this.idleTime - 2000) / 200) %
+            Math.floor((this.idleTime - 3000) / 200) %
             this.imageHub.images_idle.length;
         this.img = this.imageCache[this.imageHub.images_idle[index]];
     }
@@ -383,7 +365,7 @@ export class Character extends MovableObject {
      */
     playLongIdleAnimation() {
         let maxIndex = this.imageHub.images_long_idle.length - 1;
-        let calculatedIndex = Math.floor((this.idleTime - 4000) / 200);
+        let calculatedIndex = Math.floor((this.idleTime - 5000) / 200);
         let index = Math.min(calculatedIndex, maxIndex);
 
         this.img = this.imageCache[this.imageHub.images_long_idle[index]];

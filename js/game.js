@@ -1,6 +1,7 @@
 import { World } from "../models/world.class.js";
 import { Keyboard } from "../models/keyboard.class.js";
 import { AudioHub } from "../models/audio.hub.js";
+import { IntervalHub } from "../models/interval-hub.class.js";
 
 let canvas;
 let world;
@@ -39,14 +40,21 @@ function applyMuteState(gameWorld) {
  * @param {boolean} isPressed - Press state.
  */
 function updateKeyboardState(e, isPressed) {
+    if (["Space", "Tab", "ArrowLeft", "ArrowRight", "KeyF"].includes(e.code)) {
+        e.preventDefault();
+    }
+
     if (e.code === "ArrowLeft") keyboard.LEFT = isPressed;
     if (e.code === "ArrowRight") keyboard.RIGHT = isPressed;
-    if (e.code === "ArrowDown") keyboard.DOWN = isPressed;
-    if (e.code === "Space") keyboard.UP = isPressed; // Leertaste steuert den Sprung (UP)
-    if (e.code === "KeyF") keyboard.THROW = isPressed;
+    if (e.code === "Space") {
+        keyboard.SPACE = isPressed;
+    }
+    if (e.code === "KeyF") {
+        keyboard.THROW = isPressed;
+    }
 }
 
-// HIER FEHLTEN DIE EVENT-LISTENER:
+// Registriere die Event-Listener für die Tastatur
 window.addEventListener("keydown", (e) => updateKeyboardState(e, true));
 window.addEventListener("keyup", (e) => updateKeyboardState(e, false));
 
@@ -57,7 +65,7 @@ function initTouchControls() {
     let buttons = [
         ["btn-left", "LEFT"],
         ["btn-right", "RIGHT"],
-        ["btn-jump", "UP"],
+        ["btn-jump", "SPACE"],
         ["btn-throw", "THROW"],
     ];
     buttons.forEach(([id, key]) => bindSingleTouchButton(id, key));
@@ -71,6 +79,8 @@ function initTouchControls() {
 function bindSingleTouchButton(id, key) {
     let btn = document.getElementById(id);
     if (!btn) return;
+
+    btn.addEventListener("contextmenu", (event) => event.preventDefault());
 
     ["pointerdown", "pointerup", "pointercancel", "pointerleave"].forEach(
         (eventType) => {
@@ -101,10 +111,15 @@ function handlePointerAction(e, key, btn, eventType) {
  * Toggles global mute status.
  */
 window.toggleMute = function () {
-    let isMuted = window.world?.audioHub
-        ? window.world.audioHub.toggleMute()
-        : globalAudioHub.toggleMute();
+    let activeAudioHub = window.world?.audioHub || globalAudioHub;
+    let isMuted = activeAudioHub.toggleMute();
+    if (activeAudioHub !== globalAudioHub) {
+        globalAudioHub.setMuted(isMuted);
+    }
     updateMuteButtonUI(isMuted);
+    if (!isMuted && window.world?.audioHub) {
+        window.world.audioHub.play("background", 0.2);
+    }
 };
 
 /**
@@ -118,6 +133,8 @@ function updateMuteButtonUI(isMuted) {
     btn.classList.toggle("muted", isMuted);
     if (svg) svg.innerHTML = getMuteSvgContent(isMuted);
 }
+
+updateMuteButtonUI(globalAudioHub.isMuted);
 
 /**
  * Returns corresponding SVG content for mute button.
@@ -255,10 +272,10 @@ function runCountdownVisuals(countdownDiv) {
     let steps = ["3", "2", "1", "GO!"];
     let i = 0;
     countdownDiv.innerHTML = steps[i];
-    let interval = setInterval(() => {
+    let intervalId = IntervalHub.start(() => {
         i++;
         if (i < steps.length) countdownDiv.innerHTML = steps[i];
-        else clearInterval(interval);
+        else IntervalHub.stop(intervalId);
     }, 1000);
 }
 
@@ -268,6 +285,7 @@ function runCountdownVisuals(countdownDiv) {
 function hideStartScreen() {
     let startScreen = document.getElementById("start-screen");
     if (startScreen) startScreen.style.display = "none";
+    document.body.classList.add("game-active");
     isStarting = false;
     init();
 }
@@ -320,6 +338,7 @@ function resetUIReturnScreens() {
     document.getElementById("game-over-screen").classList.add("hidden");
     document.getElementById("win-screen").classList.add("hidden");
     document.getElementById("countdown-display")?.remove();
+    document.body.classList.remove("game-active");
     let startScreen = document.getElementById("start-screen");
     if (startScreen) startScreen.style.display = "";
 }

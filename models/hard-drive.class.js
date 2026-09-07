@@ -1,5 +1,6 @@
 import { MovableObject } from "./movable-objects.class.js";
 import { ImageHub } from "./image.hub.js";
+import { IntervalHub } from "./interval-hub.class.js";
 
 /**
  * Repräsentiert ein sich bewegendes Hard-Drive-Monster im Spiel.
@@ -22,15 +23,14 @@ export class HardDrive extends MovableObject {
      * Erstellt ein neues Hard-Drive-Monster und initialisiert dessen
      * Darstellung, Position und Bewegungsgeschwindigkeit.
      */
-    constructor() {
+    constructor(startX, speed = 0.2) {
         super();
         this.loadImage("assets/img/monster/hardDrive0.webp");
         this.loadImages(this.imageHub.images_hard_drive);
-        this.animate();
-
-        this.x = 500 + Math.random() * 2000;
-        this.speed = 0.15 + Math.random() * 0.25;
+        this.x = startX;
+        this.speed = speed;
         this.y = 350;
+        this.animate();
     }
 
     /**
@@ -46,7 +46,7 @@ export class HardDrive extends MovableObject {
     animate() {
         this.moveLeft();
 
-        setInterval(() => {
+        IntervalHub.start(() => {
             let i = this.currentImage % this.imageHub.images_hard_drive.length;
             let path = this.imageHub.images_hard_drive[i];
             this.img = this.imageCache[path];
@@ -61,8 +61,8 @@ export class HardDrive extends MovableObject {
      * @returns {void}
      */
     moveLeft() {
-        setInterval(() => {
-            this.x -= 0.15;
+        IntervalHub.start(() => {
+            this.x -= this.speed;
         }, 1000 / 60);
     }
 }

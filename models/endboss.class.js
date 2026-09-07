@@ -1,5 +1,6 @@
 import { MovableObject } from "./movable-objects.class.js";
 import { ImageHub } from "./image.hub.js";
+import { IntervalHub } from "./interval-hub.class.js";
 
 /**
  * Represents the final boss of the game.
@@ -63,13 +64,13 @@ export class Endboss extends MovableObject {
      */
     runTransformationLoop() {
         let index = 0;
-        let interval = setInterval(() => {
+        let intervalId = IntervalHub.start(() => {
             let images = this.imageHub.images_boss_transformation;
             if (index < images.length) {
                 this.img = this.imageCache[images[index]];
                 index++;
             } else {
-                clearInterval(interval);
+                IntervalHub.stop(intervalId);
                 this.completeAwakening();
             }
         }, 250);
@@ -103,7 +104,7 @@ export class Endboss extends MovableObject {
      * Starts the cyclic update loop for animations.
      */
     animate() {
-        setInterval(() => {
+        IntervalHub.start(() => {
             if (this.isDead()) {
                 this.handleBossDeath();
             } else if (this.isHurt()) {
@@ -147,13 +148,13 @@ export class Endboss extends MovableObject {
      */
     runBossDeathAnimation() {
         let index = 0;
-        let interval = setInterval(() => {
+        let intervalId = IntervalHub.start(() => {
             let images = this.imageHub.images_boss_dead;
             if (index < images.length) {
                 this.img = this.imageCache[images[index]];
                 index++;
             } else {
-                clearInterval(interval);
+                IntervalHub.stop(intervalId);
             }
         }, 150);
     }

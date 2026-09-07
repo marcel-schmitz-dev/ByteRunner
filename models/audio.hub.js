@@ -56,7 +56,7 @@ export class AudioHub {
             startSoundCountdown: new MyAudio(
                 "assets/audio/start_sound_countdown.mp3",
             ),
-            youWin: new MyAudio("assets/audio/you_win.mp3"),
+            youWin: new MyAudio("assets/audio/you_wIn.mp3"),
         };
     }
 
@@ -147,9 +147,17 @@ export class AudioHub {
      * @returns {boolean} The new mute state.
      */
     toggleMute() {
-        this.isMuted = !this.isMuted;
-        localStorage.setItem("byteRunner_muted", this.isMuted);
-        this.applyMuteStateToAll();
+        this.setMuted(!this.isMuted);
         return this.isMuted;
+    }
+
+    /**
+     * Sets the global mute state and applies it to all registered sounds.
+     * @param {boolean} isMuted - Whether all sounds should be muted.
+     */
+    setMuted(isMuted) {
+        this.isMuted = isMuted;
+        localStorage.setItem("byteRunner_muted", isMuted);
+        this.applyMuteStateToAll();
     }
 }

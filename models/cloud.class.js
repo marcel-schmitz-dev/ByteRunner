@@ -1,4 +1,5 @@
 import { MovableObject } from "./movable-objects.class.js";
+import { IntervalHub } from "./interval-hub.class.js";
 
 /**
  * Repräsentiert eine bewegliche Wolke im Spiel.
@@ -40,7 +41,7 @@ export class Cloud extends MovableObject {
      * @returns {void}
      */
     moveLeft() {
-        setInterval(() => {
+        IntervalHub.start(() => {
             this.x -= 0.15;
         }, 1000 / 60);
     }

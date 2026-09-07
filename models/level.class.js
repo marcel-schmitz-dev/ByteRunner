@@ -20,7 +20,7 @@ export class Level {
     collectibleDiscs;
 
     /** @type {number} Horizontal position marking the end of the level. */
-    level_end_x = 3000;
+    level_end_x = 4000;
 
     /**
      * Creates a level with its background, entities, and collectibles.

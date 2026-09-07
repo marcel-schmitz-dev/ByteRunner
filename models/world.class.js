@@ -3,9 +3,10 @@ import { initLevel1 } from "../levels/level1.js";
 import { StatusBar } from "./status-bar.class.js";
 import { BossHpBar } from "./boss-hp-bar.class.js";
 import { ThrowableObject } from "./throwable-object.class.js";
-import { ImageHub } from "./image.hub.js";
 import { AudioHub } from "./audio.hub.js";
+import { IntervalHub } from "./interval-hub.class.js";
 import * as CollisionLogic from "./world-collision.js";
+import { COIN_BAR_IMAGES, DISC_BAR_IMAGES, HP_IMAGES } from "./hud-images.js";
 
 /**
  * Represents the main game world, managing rendering, game loops, collisions, and entities.
@@ -17,22 +18,14 @@ export class World {
     canvas;
     ctx;
     camera_x = 0;
-    imageHub = new ImageHub();
-    statusBar = new StatusBar(this.imageHub.images_hp, 100, 15, 200, 50);
-    coinBar = new StatusBar(this.imageHub.images_coinbar, 0, 75, 160, 50);
-    discBar = new StatusBar(
-        this.imageHub.images_disc || this.imageHub.images_discs,
-        0,
-        135,
-        160,
-        50,
-    );
+    statusBar = new StatusBar(HP_IMAGES, 100, 15, 200, 50);
+    coinBar = new StatusBar(COIN_BAR_IMAGES, 0, 75, 160, 50);
+    discBar = new StatusBar(DISC_BAR_IMAGES, 0, 135, 160, 50);
     bossHpBar = new BossHpBar();
     bossSpawned = false;
     throwableObjects = [];
     lastThrowTime = 0;
     audioHub = new AudioHub();
-    intervalIds = [];
     isGameRunning = true;
 
     /**
@@ -44,7 +37,6 @@ export class World {
         this.initCanvasContext(canvas, keyboard);
         this.startCoreSystems();
         this.resetBarsToZero();
-        this.level = initLevel1();
     }
 
     /**
@@ -92,8 +84,7 @@ export class World {
      */
     run() {
         this.isGameRunning = true;
-        let id = setInterval(() => this.runLoopTick(), 1000 / 60);
-        this.intervalIds.push(id);
+        IntervalHub.start(() => this.runLoopTick(), 1000 / 60);
     }
 
     /**
@@ -141,16 +132,6 @@ export class World {
     }
 
     /**
-     * Stops all audio hub sounds.
-     */
-    stopAllAudioSounds() {
-        if (!this.audioHub) return;
-        for (let key in this.audioHub.sounds) {
-            this.audioHub.stop(key);
-        }
-    }
-
-    /**
      * Sets character state to game won.
      */
     setWinCharacterState() {
@@ -166,17 +147,8 @@ export class World {
      */
     stopGame() {
         this.isGameRunning = false;
-        this.clearAllIntervals();
+        IntervalHub.stopAll();
         this.stopBossRelatedAudio();
-        this.resetBossEntityState();
-    }
-
-    /**
-     * Clears all running intervals.
-     */
-    clearAllIntervals() {
-        this.intervalIds.forEach((id) => clearInterval(id));
-        this.intervalIds = [];
     }
 
     /**
@@ -186,19 +158,6 @@ export class World {
         this.audioHub.stop("background");
         this.audioHub.stop("bossFightSound");
         this.audioHub.stop("bossLaufSound");
-    }
-
-    /**
-     * Resets the endboss state properties.
-     */
-    resetBossEntityState() {
-        this.bossSpawned = false;
-        let endboss = this.level.enemies.find((e) => this.isEndboss(e));
-        if (endboss) {
-            endboss.energy = 100;
-            endboss.hasBeenSeen = false;
-            endboss.isAwake = false;
-        }
     }
 
     /**
@@ -228,7 +187,8 @@ export class World {
     evaluateBossProximity(enemy) {
         let distance = enemy.x - this.character.x;
         let isWithinRange =
-            (distance < 500 && distance > -200) || this.character.x >= 2880;
+            (distance < 500 && distance > -200) ||
+            this.character.x >= this.level.level_end_x - 200;
         if (isWithinRange && !this.bossSpawned) {
             this.triggerBossAwakening(enemy);
         }
@@ -302,8 +262,7 @@ export class World {
      * Starts the object throwing listener loop.
      */
     checkThrowObjects() {
-        let id = setInterval(() => this.throwLoopTick(), 100);
-        this.intervalIds.push(id);
+        IntervalHub.start(() => this.throwLoopTick(), 100);
     }
 
     /**

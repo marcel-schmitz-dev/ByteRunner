@@ -12,17 +12,26 @@ export class BackgroundObject extends MovableObject {
 
     /** @type {number} The height of the background object in pixels. */
     height = 480;
+    static initialXPosition = -720;
+    static nextXPosition = BackgroundObject.initialXPosition;
 
     /**
      * Creates a background object, loads its image, and sets its position.
      *
      * @param {string} imagePath - The path to the image to load.
-     * @param {number} x - The horizontal position in pixels.
      * @param {number} y - The vertical position in pixels.
      */
-    constructor(imagePath, x, y) {
+    constructor(imagePath, y = 0) {
         super().loadImage(imagePath);
         this.y = y;
-        this.x = x;
+        this.x = BackgroundObject.nextXPosition;
+        BackgroundObject.nextXPosition += this.width;
+    }
+
+    /**
+     * Resets the position for a newly created level.
+     */
+    static resetPositions() {
+        BackgroundObject.nextXPosition = BackgroundObject.initialXPosition;
     }
 }

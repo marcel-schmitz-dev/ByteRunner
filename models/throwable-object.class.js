@@ -1,4 +1,5 @@
 import { MovableObject } from "./movable-objects.class.js";
+import { IntervalHub } from "./interval-hub.class.js";
 
 /**
  * Represents a throwable projectile (like a disc) thrown by the character.
@@ -55,7 +56,7 @@ export class ThrowableObject extends MovableObject {
      * @param {boolean} otherDirection - True for moving left, false for right.
      */
     startHorizontalMovement(otherDirection) {
-        setInterval(() => {
+        IntervalHub.start(() => {
             if (otherDirection) {
                 this.x -= 10;
             } else {

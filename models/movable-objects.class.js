@@ -1,4 +1,5 @@
 import { DrawableObject } from "../models/drawable-object.class.js";
+import { IntervalHub } from "./interval-hub.class.js";
 
 /**
  * Represents a moving object in the game world with physics, health, and collision detection.
@@ -15,7 +16,7 @@ export class MovableObject extends DrawableObject {
      * Applies gravity physics to the object over time.
      */
     applyGravity() {
-        setInterval(() => {
+        IntervalHub.start(() => {
             if (this.isAboveGround() || this.speedY > 0) {
                 this.y -= this.speedY;
                 this.speedY -= this.acceleration;
