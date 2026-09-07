@@ -349,9 +349,9 @@ export class Character extends MovableObject {
      * Selects and plays idle animations based on accumulated idle time.
      */
     handleIdleAnimationsByTime() {
-        if (this.idleTime > 3000) {
+        if (this.idleTime > 4000) {
             this.playLongIdleAnimation();
-        } else if (this.idleTime > 1000) {
+        } else if (this.idleTime > 2000) {
             this.stopSnoring();
             this.playIdleAnimation();
         } else {
@@ -373,7 +373,8 @@ export class Character extends MovableObject {
      */
     playIdleAnimation() {
         let index =
-            Math.floor(this.idleTime / 200) % this.imageHub.images_idle.length;
+            Math.floor((this.idleTime - 2000) / 200) %
+            this.imageHub.images_idle.length;
         this.img = this.imageCache[this.imageHub.images_idle[index]];
     }
 
@@ -382,7 +383,7 @@ export class Character extends MovableObject {
      */
     playLongIdleAnimation() {
         let maxIndex = this.imageHub.images_long_idle.length - 1;
-        let calculatedIndex = Math.floor((this.idleTime - 3000) / 200);
+        let calculatedIndex = Math.floor((this.idleTime - 4000) / 200);
         let index = Math.min(calculatedIndex, maxIndex);
 
         this.img = this.imageCache[this.imageHub.images_long_idle[index]];
@@ -407,6 +408,7 @@ export class Character extends MovableObject {
      */
     jump() {
         this.speedY = 25;
+        this.idleTime = 0; // Reset idle timer on jump
         this.stopSnoring();
         if (this.world?.audioHub) {
             this.world.audioHub.play("characterJump", 0.4);

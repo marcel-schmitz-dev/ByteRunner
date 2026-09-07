@@ -39,20 +39,16 @@ function applyMuteState(gameWorld) {
  * @param {boolean} isPressed - Press state.
  */
 function updateKeyboardState(e, isPressed) {
-    if (e.code === "ArrowLeft" || e.code === "KeyA") keyboard.LEFT = isPressed;
-    if (e.code === "ArrowRight" || e.code === "KeyD")
-        keyboard.RIGHT = isPressed;
-    if (e.code === "ArrowUp" || e.code === "KeyW") keyboard.UP = isPressed;
-    if (e.code === "ArrowDown" || e.code === "KeyS") keyboard.DOWN = isPressed;
-    if (e.code === "Space") keyboard.SPACE = isPressed;
-    if (e.code === "KeyL") keyboard.THROW = isPressed;
+    if (e.code === "ArrowLeft") keyboard.LEFT = isPressed;
+    if (e.code === "ArrowRight") keyboard.RIGHT = isPressed;
+    if (e.code === "ArrowDown") keyboard.DOWN = isPressed;
+    if (e.code === "Space") keyboard.UP = isPressed; // Leertaste steuert den Sprung (UP)
+    if (e.code === "KeyF") keyboard.THROW = isPressed;
 }
 
+// HIER FEHLTEN DIE EVENT-LISTENER:
 window.addEventListener("keydown", (e) => updateKeyboardState(e, true));
 window.addEventListener("keyup", (e) => updateKeyboardState(e, false));
-document.addEventListener("DOMContentLoaded", () =>
-    updateMuteButtonUI(globalAudioHub.isMuted),
-);
 
 /**
  * Initializes touch control button bindings using Pointer Events.
