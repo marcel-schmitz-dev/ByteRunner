@@ -115,6 +115,7 @@ export class World {
     handleBossDefeatState() {
         if (!this.isBossDefeated()) return false;
         this.resetKeyboardStates();
+        this.stopBossRelatedAudio();
         this.setWinCharacterState();
         return true;
     }
