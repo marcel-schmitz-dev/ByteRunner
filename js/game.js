@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () =>
 );
 
 /**
- * Initializes touch control button bindings.
+ * Initializes touch control button bindings using Pointer Events.
  */
 function initTouchControls() {
     let buttons = [
@@ -68,32 +68,35 @@ function initTouchControls() {
 }
 
 /**
- * Binds touch listeners to a single button element.
+ * Binds pointer listeners to a single button element for fluid mobile control.
  * @param {string} id - Element ID.
  * @param {string} key - Keyboard property key.
  */
 function bindSingleTouchButton(id, key) {
     let btn = document.getElementById(id);
     if (!btn) return;
-    ["touchstart", "touchend", "touchcancel"].forEach((eventType) => {
-        btn.addEventListener(
-            eventType,
-            (e) => handleTouchAction(e, key, btn, eventType),
-            { passive: false },
-        );
-    });
+
+    ["pointerdown", "pointerup", "pointercancel", "pointerleave"].forEach(
+        (eventType) => {
+            btn.addEventListener(
+                eventType,
+                (e) => handlePointerAction(e, key, btn, eventType),
+                { passive: false },
+            );
+        },
+    );
 }
 
 /**
- * Handles individual touch event actions.
- * @param {TouchEvent} e - Touch event.
+ * Handles individual pointer event actions.
+ * @param {PointerEvent} e - Pointer event.
  * @param {string} key - Key name.
  * @param {HTMLElement} btn - Button element.
  * @param {string} eventType - Event type string.
  */
-function handleTouchAction(e, key, btn, eventType) {
+function handlePointerAction(e, key, btn, eventType) {
     e.preventDefault();
-    let isDown = eventType === "touchstart";
+    let isDown = eventType === "pointerdown";
     keyboard[key] = isDown;
     btn.classList.toggle("active", isDown);
 }
