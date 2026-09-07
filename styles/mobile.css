@@ -6,6 +6,8 @@ body {
     margin: 0;
     padding: 0;
     position: fixed;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .portrait-warning-overlay {
@@ -55,6 +57,8 @@ body {
     box-sizing: border-box;
     z-index: 200;
     pointer-events: none;
+    touch-action: none;
+    -webkit-touch-callout: none;
 }
 
 @media screen and (max-width: 1400px) and (orientation: landscape) {
@@ -97,8 +101,10 @@ body {
     -webkit-user-select: none;
     outline: none;
     touch-action: none;
+    -webkit-touch-callout: none;
     cursor: pointer;
     transition: all 0.15s ease;
+    transform: translateZ(0);
 }
 
 .touch-btn:active,
@@ -112,5 +118,5 @@ body {
         0 0 20px rgba(255, 0, 128, 0.8),
         0 0 10px rgba(0, 255, 255, 0.8);
     text-shadow: 0 0 8px rgba(10, 10, 18, 0.6);
-    transform: scale(0.93);
+    transform: scale(0.93) translateZ(0);
 }
