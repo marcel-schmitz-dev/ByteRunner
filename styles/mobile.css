@@ -1,7 +1,7 @@
 html,
 body {
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     margin: 0;
     padding: 0;
@@ -14,7 +14,7 @@ body {
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     background: #0a0a12;
     z-index: 9999;
     justify-content: center;
@@ -47,7 +47,7 @@ body {
 .mobile-controls {
     display: none;
     position: absolute;
-    bottom: 5px;
+    bottom: max(10px, env(safe-area-inset-bottom));
     left: 0;
     width: 100%;
     justify-content: space-between;
@@ -111,7 +111,6 @@ body {
     box-shadow:
         0 0 20px rgba(255, 0, 128, 0.8),
         0 0 10px rgba(0, 255, 255, 0.8);
-    /* Intensiverer Glow beim Drücken */
     text-shadow: 0 0 8px rgba(10, 10, 18, 0.6);
     transform: scale(0.93);
 }
