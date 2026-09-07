@@ -3,7 +3,6 @@ import { ImageHub } from "./image.hub.js";
 
 /**
  * Represents the final boss of the game.
- * The boss can awaken, move toward the character, and play transformation, walk, hurt, or death animations.
  * @extends MovableObject
  */
 export class Endboss extends MovableObject {
@@ -11,10 +10,8 @@ export class Endboss extends MovableObject {
     width = 300;
     speed = 1.5;
     energy = 100;
-
     imageHub = new ImageHub();
     currentImage = 0;
-
     hasBeenSeen = false;
     isTransforming = false;
     isAwake = false;
@@ -22,8 +19,8 @@ export class Endboss extends MovableObject {
     world;
 
     /**
-     * Creates a new final boss instance and loads its animation assets.
-     * @param {number} [startX=3200] - Horizontal starting position of the boss.
+     * Creates a new final boss instance.
+     * @param {number} [startX=3200] - Horizontal starting position.
      */
     constructor(startX) {
         super();
@@ -31,18 +28,24 @@ export class Endboss extends MovableObject {
     }
 
     /**
-     * Initializes images, start position, and coordinates.
+     * Initializes images and start position.
      * @param {number} startX - Horizontal coordinate.
      */
     initializeBossAssets(startX) {
         this.loadImage("assets/img/boss/bossTransformation0.webp");
+        this.loadBossImages();
+        this.x = startX !== undefined ? startX : 3200;
+        this.y = 80;
+    }
+
+    /**
+     * Loads all asset image arrays for animations.
+     */
+    loadBossImages() {
         this.loadImages(this.imageHub.images_boss_transformation);
         this.loadImages(this.imageHub.images_boss_walk);
         this.loadImages(this.imageHub.images_boss_hurt);
         this.loadImages(this.imageHub.images_boss_dead);
-
-        this.x = startX !== undefined ? startX : 3200;
-        this.y = 80;
     }
 
     /**
@@ -56,24 +59,24 @@ export class Endboss extends MovableObject {
     }
 
     /**
-     * Executes the interval loop for the transformation animation sequence.
+     * Executes the transformation interval loop.
      */
     runTransformationLoop() {
-        let transformationIndex = 0;
-        let transformInterval = setInterval(() => {
-            if (transformationIndex < this.imageHub.images_boss_transformation.length) {
-                let path = this.imageHub.images_boss_transformation[transformationIndex];
-                this.img = this.imageCache[path];
-                transformationIndex++;
+        let index = 0;
+        let interval = setInterval(() => {
+            let images = this.imageHub.images_boss_transformation;
+            if (index < images.length) {
+                this.img = this.imageCache[images[index]];
+                index++;
             } else {
-                clearInterval(transformInterval);
+                clearInterval(interval);
                 this.completeAwakening();
             }
         }, 250);
     }
 
     /**
-     * Finalizes the awakening state and starts the animation loop.
+     * Finalizes the awakening state.
      */
     completeAwakening() {
         this.isTransforming = false;
@@ -82,12 +85,11 @@ export class Endboss extends MovableObject {
     }
 
     /**
-     * Moves the awakened boss horizontally toward the playable character.
-     * @param {MovableObject} character - Target object the boss follows.
+     * Moves the boss horizontally toward the character.
+     * @param {MovableObject} character - Target object.
      */
     hunt(character) {
         if (!this.isAwake || this.isDead()) return;
-
         if (this.x > character.x) {
             this.x -= this.speed;
             this.otherDirection = false;
@@ -98,7 +100,7 @@ export class Endboss extends MovableObject {
     }
 
     /**
-     * Starts the cyclic update loop for boss animations and health checks.
+     * Starts the cyclic update loop for animations.
      */
     animate() {
         setInterval(() => {
@@ -113,7 +115,7 @@ export class Endboss extends MovableObject {
     }
 
     /**
-     * Displays the hurt image when the boss takes damage.
+     * Displays the hurt image.
      */
     handleBossHurt() {
         let path = this.imageHub.images_boss_hurt[0];
@@ -121,7 +123,7 @@ export class Endboss extends MovableObject {
     }
 
     /**
-     * Manages the boss's death sequence and audio cues.
+     * Manages the death sequence and audio cues.
      */
     handleBossDeath() {
         if (this.isDeadAnimationPlayed) return;
@@ -132,51 +134,78 @@ export class Endboss extends MovableObject {
     }
 
     /**
-     * Schedules the display of the win screen after the death animation completes.
-     */
-    scheduleWinScreenDisplay() {
-        let animationDuration = this.imageHub.images_boss_dead.length * 150;
-        let viewingBuffer = 1000;
-
-        setTimeout(() => {
-            let winScreen = document.getElementById("win-screen");
-            if (winScreen) {
-                winScreen.classList.remove("hidden");
-            }
-        }, animationDuration + viewingBuffer);
-    }
-
-    /**
      * Triggers sound effects when the boss dies.
      */
     playBossDeathAudio() {
-        if (this.world?.audioHub) {
-            this.world.audioHub.play("bossDead", 1.0);
-            this.world.audioHub.stop("bossLaufSound");
-        }
+        if (!this.world?.audioHub) return;
+        this.world.audioHub.play("bossDead", 1.0);
+        this.world.audioHub.stop("bossLaufSound");
     }
 
     /**
      * Plays the death animation frames sequentially.
      */
     runBossDeathAnimation() {
-        let deadIndex = 0;
-        let deadInterval = setInterval(() => {
-            if (deadIndex < this.imageHub.images_boss_dead.length) {
-                let path = this.imageHub.images_boss_dead[deadIndex];
-                this.img = this.imageCache[path];
-                deadIndex++;
+        let index = 0;
+        let interval = setInterval(() => {
+            let images = this.imageHub.images_boss_dead;
+            if (index < images.length) {
+                this.img = this.imageCache[images[index]];
+                index++;
             } else {
-                clearInterval(deadInterval);
+                clearInterval(interval);
             }
         }, 150);
     }
 
     /**
-     * Cycles through the walking animation frames when the boss is active.
+     * Schedules the win screen and audio sequence.
+     */
+    scheduleWinScreenDisplay() {
+        let duration = this.imageHub.images_boss_dead.length * 150;
+        setTimeout(() => {
+            this.executeWinSequence();
+        }, duration);
+    }
+
+    /**
+     * Executes the win sound playback and screen display.
+     */
+    executeWinSequence() {
+        let winScreen = document.getElementById("win-screen");
+        let audioHub = this.world?.audioHub;
+        if (audioHub && !audioHub.isMuted) {
+            let soundObj = audioHub.sounds["youWin"];
+            if (soundObj?.file) {
+                this.playWinSoundFile(soundObj.file, winScreen);
+                return;
+            }
+        }
+        if (winScreen) winScreen.classList.remove("hidden");
+    }
+
+    /**
+     * Plays the win sound file and handles its completion event.
+     * @param {HTMLAudioElement} audioFile - Sound file element.
+     * @param {HTMLElement} winScreen - Win screen DOM element.
+     */
+    playWinSoundFile(audioFile, winScreen) {
+        audioFile.currentTime = 0;
+        audioFile.volume = 1.0;
+        audioFile.onended = () => {
+            if (winScreen) winScreen.classList.remove("hidden");
+        };
+        audioFile.play().catch(() => {
+            if (winScreen) winScreen.classList.remove("hidden");
+        });
+    }
+
+    /**
+     * Cycles through the walking animation frames.
      */
     handleBossWalking() {
-        let index = this.currentImage % this.imageHub.images_boss_walk.length;
+        let length = this.imageHub.images_boss_walk.length;
+        let index = this.currentImage % length;
         let path = this.imageHub.images_boss_walk[index];
         this.img = this.imageCache[path];
         this.currentImage++;

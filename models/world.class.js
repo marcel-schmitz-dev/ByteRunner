@@ -1,5 +1,5 @@
 import { Character } from "./character.class.js";
-import { level1 } from "../levels/level1.js";
+import { initLevel1 } from "../levels/level1.js";
 import { StatusBar } from "./status-bar.class.js";
 import { BossHpBar } from "./boss-hp-bar.class.js";
 import { ThrowableObject } from "./throwable-object.class.js";
@@ -13,7 +13,7 @@ import * as CollisionLogic from "./world-collision.js";
 export class World {
     character;
     keyboard;
-    level = level1;
+    level;
     canvas;
     ctx;
     camera_x = 0;
@@ -36,26 +36,59 @@ export class World {
     isGameRunning = true;
 
     /**
-     * Initializes a new instance of the World class.
-     * @param {HTMLCanvasElement} canvas - The HTML canvas element.
-     * @param {Object} keyboard - The keyboard input controller.
+     * Initializes the game world.
+     * @param {HTMLCanvasElement} canvas - The canvas element.
+     * @param {Object} keyboard - The keyboard handler.
      */
     constructor(canvas, keyboard) {
+        this.initCanvasContext(canvas, keyboard);
+        this.startCoreSystems();
+        this.resetBarsToZero();
+        this.level = initLevel1();
+    }
+
+    /**
+     * Initializes canvas context and audio.
+     * @param {HTMLCanvasElement} canvas - The canvas.
+     * @param {Object} keyboard - The keyboard.
+     */
+    initCanvasContext(canvas, keyboard) {
         this.ctx = canvas.getContext("2d");
         this.canvas = canvas;
         this.keyboard = keyboard;
-        this.audioHub.play("background", 0.2);
+        this.level = initLevel1();
         this.character = new Character(this);
+        this.playBackgroundAudio();
+    }
+
+    /**
+     * Plays background audio from start.
+     */
+    playBackgroundAudio() {
+        let bgSound = this.audioHub.sounds["background"];
+        if (bgSound?.file) bgSound.file.currentTime = 0;
+        this.audioHub.play("background", 0.2);
+    }
+
+    /**
+     * Starts core game systems like draw and run loops.
+     */
+    startCoreSystems() {
         this.draw();
         this.run();
         this.checkThrowObjects();
+    }
 
+    /**
+     * Resets bar percentages to zero.
+     */
+    resetBarsToZero() {
         this.coinBar.setPercentage(0, "0");
         this.discBar.setPercentage(0, "0");
     }
 
     /**
-     * Starts the main game loop running at 60 FPS.
+     * Runs the main game loop interval.
      */
     run() {
         this.isGameRunning = true;
@@ -68,11 +101,7 @@ export class World {
      */
     runLoopTick() {
         if (!this.isGameRunning) return;
-        let endboss = this.level.enemies.find((e) => this.isEndboss(e));
-        if (endboss && endboss.isDead()) {
-            this.resetKeyboardStates();
-            return;
-        }
+        if (this.handleBossDefeatState()) return;
         this.checkCollisions();
         this.checkBossAwakening();
         this.checkCollectibles();
@@ -80,7 +109,27 @@ export class World {
     }
 
     /**
-     * Resets all movement and action flags in the keyboard state.
+     * Handles boss defeat checks and state changes.
+     * @returns {boolean} True if boss is defeated.
+     */
+    handleBossDefeatState() {
+        if (!this.isBossDefeated()) return false;
+        this.resetKeyboardStates();
+        this.setWinCharacterState();
+        return true;
+    }
+
+    /**
+     * Checks if endboss is defeated.
+     * @returns {boolean} True if defeated.
+     */
+    isBossDefeated() {
+        let endboss = this.level.enemies.find((e) => this.isEndboss(e));
+        return endboss && endboss.isDead();
+    }
+
+    /**
+     * Resets all keyboard input flags.
      */
     resetKeyboardStates() {
         this.keyboard.LEFT = false;
@@ -91,62 +140,107 @@ export class World {
     }
 
     /**
-     * Stops all active intervals, sounds, and rendering loops for a clean restart.
+     * Stops all audio hub sounds.
+     */
+    stopAllAudioSounds() {
+        if (!this.audioHub) return;
+        for (let key in this.audioHub.sounds) {
+            this.audioHub.stop(key);
+        }
+    }
+
+    /**
+     * Sets character state to game won.
+     */
+    setWinCharacterState() {
+        if (!this.character) return;
+        this.character.isGameWon = true;
+        if (typeof this.character.stopSnoring === "function") {
+            this.character.stopSnoring();
+        }
+    }
+
+    /**
+     * Stops the entire game.
      */
     stopGame() {
         this.isGameRunning = false;
+        this.clearAllIntervals();
+        this.stopBossRelatedAudio();
+        this.resetBossEntityState();
+    }
+
+    /**
+     * Clears all running intervals.
+     */
+    clearAllIntervals() {
         this.intervalIds.forEach((id) => clearInterval(id));
         this.intervalIds = [];
+    }
+
+    /**
+     * Stops background and boss sounds.
+     */
+    stopBossRelatedAudio() {
         this.audioHub.stop("background");
         this.audioHub.stop("bossFightSound");
         this.audioHub.stop("bossLaufSound");
     }
 
     /**
-     * Triggers the hunt behavior if the endboss is present in the level.
+     * Resets the endboss state properties.
+     */
+    resetBossEntityState() {
+        this.bossSpawned = false;
+        let endboss = this.level.enemies.find((e) => this.isEndboss(e));
+        if (endboss) {
+            endboss.energy = 100;
+            endboss.hasBeenSeen = false;
+            endboss.isAwake = false;
+        }
+    }
+
+    /**
+     * Handles boss behavior updates.
      */
     handleBossBehavior() {
         this.level.enemies.forEach((enemy) => {
-            if (this.isEndboss(enemy)) {
-                enemy.hunt(this.character);
-            }
+            if (this.isEndboss(enemy)) enemy.hunt(this.character);
         });
     }
 
     /**
-     * Checks if the character is close enough to wake up the endboss.
+     * Checks if the boss should awaken.
      */
     checkBossAwakening() {
         this.level.enemies.forEach((enemy) => {
-            if (this.isEndboss(enemy) && this.shouldAwakenBoss(enemy)) {
-                this.activateBoss(enemy);
+            if (this.isEndboss(enemy) && !enemy.hasBeenSeen) {
+                this.evaluateBossProximity(enemy);
             }
         });
     }
 
     /**
-     * Determines whether the boss should trigger its awakening sequence.
-     * @param {Object} enemy - The enemy object to evaluate.
-     * @returns {boolean} True if the boss should wake up.
+     * Evaluates distance to trigger boss awakening.
+     * @param {Object} enemy - The enemy object.
      */
-    shouldAwakenBoss(enemy) {
+    evaluateBossProximity(enemy) {
         let distance = enemy.x - this.character.x;
         let isWithinRange =
             (distance < 500 && distance > -200) || this.character.x >= 2880;
-        return isWithinRange && !enemy.hasBeenSeen;
+        if (isWithinRange && !this.bossSpawned) {
+            this.triggerBossAwakening(enemy);
+        }
     }
 
     /**
-     * Activates the endboss, plays audio cues, and updates states.
-     * @param {Object} enemy - The endboss enemy instance.
+     * Triggers the boss awakening sequence and sounds.
+     * @param {Object} enemy - The enemy object.
      */
-    activateBoss(enemy) {
-        if (this.bossSpawned) return;
-        
+    triggerBossAwakening(enemy) {
         enemy.world = this;
         enemy.awakening();
         this.bossSpawned = true;
-
         this.audioHub.stop("background");
         this.audioHub.play("bossDetected", 0.4);
         this.audioHub.play("bossFightSound", 0.3);
@@ -154,17 +248,17 @@ export class World {
     }
 
     /**
-     * Checks and handles collisions between character and collectible items.
+     * Checks collectibles interactions.
      */
     checkCollectibles() {
-        this.checkCoinCollisions();
-        this.checkDiscCollisions();
+        this.checkCoinCollection();
+        this.checkDiscCollection();
     }
 
     /**
-     * Handles collection of coins.
+     * Processes coin collections.
      */
-    checkCoinCollisions() {
+    checkCoinCollection() {
         if (!this.level.coins) return;
         this.level.coins.forEach((coin, index) => {
             if (this.character.isColliding(coin)) {
@@ -183,9 +277,9 @@ export class World {
     }
 
     /**
-     * Handles collection of collectible discs.
+     * Processes collectible disc collection.
      */
-    checkDiscCollisions() {
+    checkDiscCollection() {
         if (!this.level.collectibleDiscs) return;
         this.level.collectibleDiscs.forEach((discItem, index) => {
             if (this.character.isColliding(discItem)) {
@@ -204,7 +298,7 @@ export class World {
     }
 
     /**
-     * Listens for throw input and spawns throwable objects if available.
+     * Starts the object throwing listener loop.
      */
     checkThrowObjects() {
         let id = setInterval(() => this.throwLoopTick(), 100);
@@ -212,31 +306,29 @@ export class World {
     }
 
     /**
-     * Executes the throw check on a loop interval tick.
+     * Tick handler for throwing objects.
      */
     throwLoopTick() {
         if (!this.isGameRunning) return;
         let currentTime = new Date().getTime();
         let canThrow =
             this.keyboard.THROW && currentTime - this.lastThrowTime > 500;
-
         if (canThrow && this.character.discs && this.character.discs > 0) {
-            this.executeThrow(currentTime);
+            this.executeThrowAction(currentTime);
         }
     }
 
     /**
-     * Executes the throwing mechanism, decrementing ammo and instantiating the disc.
-     * @param {number} currentTime - The current timestamp.
+     * Executes the throwing of a disc.
+     * @param {number} currentTime - Current timestamp.
      */
-    executeThrow(currentTime) {
+    executeThrowAction(currentTime) {
         this.character.discs--;
         this.audioHub.play("characterDiscWerfen", 0.5);
         this.discBar.setPercentage(
             this.character.discs * 20,
             `${this.character.discs}`,
         );
-
         let discX = this.character.otherDirection
             ? this.character.x - 10
             : this.character.x + 50;
@@ -245,33 +337,36 @@ export class World {
             this.character.y + 50,
             this.character.otherDirection,
         );
-
         this.throwableObjects.push(disc);
         this.lastThrowTime = currentTime;
     }
 
-    // Mapping der ausgelagerten Kollisions-Methoden
-    checkCollisions() { CollisionLogic.checkCollisions.call(this); }
-    checkEnemyCollisions() { CollisionLogic.checkEnemyCollisions.call(this); }
-    isCharacterCollidingWith(enemy) { return CollisionLogic.isCharacterCollidingWith.call(this, enemy); }
-    handleEnemyCollisionResponse(enemy, enemyIndex) { CollisionLogic.handleEnemyCollisionResponse.call(this, enemy, enemyIndex); }
-    checkProjectileCollisions() { CollisionLogic.checkProjectileCollisions.call(this); }
-    isEndboss(entity) { return CollisionLogic.isEndboss.call(this, entity); }
+    /**
+     * Checks game collisions.
+     */
+    checkCollisions() {
+        CollisionLogic.checkCollisions.call(this);
+    }
 
     /**
-     * Renders the entire world frame, including backgrounds, entities, and UI elements.
+     * Checks if an entity is an endboss.
+     * @param {Object} entity - The entity.
+     * @returns {boolean} True if endboss.
+     */
+    isEndboss(entity) {
+        return CollisionLogic.isEndboss.call(this, entity);
+    }
+
+    /**
+     * Main render draw loop.
      */
     draw() {
         if (!this.isGameRunning) return;
-
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.translate(this.camera_x, 0);
-
         this.drawWorldObjects();
-
         this.ctx.translate(-this.camera_x, 0);
         this.drawUIElements();
-
         let self = this;
         requestAnimationFrame(() => {
             self.draw();
@@ -279,11 +374,17 @@ export class World {
     }
 
     /**
-     * Renders background, clouds, collectibles, enemies, and character with camera offset.
+     * Draws all world entities and background.
      */
     drawWorldObjects() {
         this.addObjectsToMap(this.level.backgroundObjects);
-        this.drawDarkOverlay();
+        this.ctx.fillStyle = "rgba(10, 10, 20, 0.4)";
+        this.ctx.fillRect(
+            -this.camera_x,
+            0,
+            this.canvas.width,
+            this.canvas.height,
+        );
         this.addObjectsToMap(this.level.clouds);
         this.addObjectsToMap(this.level.coins);
         this.addObjectsToMap(this.level.collectibleDiscs);
@@ -293,34 +394,18 @@ export class World {
     }
 
     /**
-     * Draws a subtle dark atmosphere overlay across the scrolling level.
-     */
-    drawDarkOverlay() {
-        this.ctx.fillStyle = "rgba(10, 10, 20, 0.4)";
-        this.ctx.fillRect(
-            -this.camera_x,
-            0,
-            this.canvas.width,
-            this.canvas.height,
-        );
-    }
-
-    /**
-     * Renders user interface elements fixed to the screen overlay.
+     * Draws user interface bars.
      */
     drawUIElements() {
         this.addToMap(this.statusBar);
         this.addToMap(this.coinBar);
         this.addToMap(this.discBar);
-
-        if (this.bossSpawned) {
-            this.addToMap(this.bossHpBar);
-        }
+        if (this.bossSpawned) this.addToMap(this.bossHpBar);
     }
 
     /**
-     * Adds an array of game objects to the rendering pipeline.
-     * @param {Array} objects - List of renderable objects.
+     * Adds a list of objects to the canvas map.
+     * @param {Array} objects - Array of movable objects.
      */
     addObjectsToMap(objects) {
         if (!objects) return;
@@ -330,8 +415,8 @@ export class World {
     }
 
     /**
-     * Renders a single movable game object, handling horizontal mirroring if required.
-     * @param {Object} mo - The movable object.
+     * Draws an individual movable object, handling mirroring.
+     * @param {Object} mo - Movable object.
      */
     addToMap(mo) {
         if (mo.otherDirection) {

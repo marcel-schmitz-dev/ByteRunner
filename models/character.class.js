@@ -21,6 +21,7 @@ export class Character extends MovableObject {
     isBouncing = false;
     idleTime = 0;
     isSnoringSoundActive = false;
+    isGameWon = false;
 
     /**
      * Creates a new character instance and initializes its resources, gravity, and animation loops.
@@ -32,6 +33,7 @@ export class Character extends MovableObject {
         this.loadCharacterImages();
         this.applyGravity();
         this.animate();
+        this.lastActionTime = new Date().getTime();
     }
 
     /**
@@ -53,9 +55,18 @@ export class Character extends MovableObject {
      */
     hit(damage = 5) {
         super.hit(damage);
-        if (this.isDead() && !this.isGameOverPlayed && this.world?.audioHub) {
-            this.isGameOverPlayed = true;
-            this.stopSnoring();
+        if (this.isDead() && !this.isGameOverPlayed) {
+            this.triggerGameOverAudioAndState();
+        }
+    }
+
+    /**
+     * Triggers game over sound and stops background/running audio.
+     */
+    triggerGameOverAudioAndState() {
+        this.isGameOverPlayed = true;
+        this.stopSnoring();
+        if (this.world?.audioHub) {
             this.world.audioHub.play("gameOverSound", 0.8);
             this.world.audioHub.stop("background");
             this.world.audioHub.stop("characterRun");
@@ -85,16 +96,32 @@ export class Character extends MovableObject {
      * Processes left and right movement flags based on keyboard input.
      */
     handleHorizontalMovement() {
+        this.handleRightMovement();
+        this.handleLeftMovement();
+    }
+
+    /**
+     * Moves the character to the right if input and boundaries allow.
+     */
+    handleRightMovement() {
         if (
             this.world?.keyboard.RIGHT &&
             this.x < this.world.level.level_end_x
         ) {
             this.x += this.speed;
             this.otherDirection = false;
+            this.lastActionTime = new Date().getTime();
         }
+    }
+
+    /**
+     * Moves the character to the left if input and boundaries allow.
+     */
+    handleLeftMovement() {
         if (this.world?.keyboard.LEFT && this.x > 0) {
             this.x -= this.speed;
             this.otherDirection = true;
+            this.lastActionTime = new Date().getTime();
         }
     }
 
@@ -144,6 +171,14 @@ export class Character extends MovableObject {
             this.currentImage = 0;
             this.scheduleGameOverScreen();
         }
+        this.renderDeadFrame();
+        return true;
+    }
+
+    /**
+     * Renders the current frame of the death sequence.
+     */
+    renderDeadFrame() {
         let index = Math.min(
             this.currentImage,
             this.imageHub.images_dead.length - 1,
@@ -152,7 +187,6 @@ export class Character extends MovableObject {
         if (this.currentImage < this.imageHub.images_dead.length - 1) {
             this.currentImage++;
         }
-        return true;
     }
 
     /**
@@ -204,14 +238,21 @@ export class Character extends MovableObject {
      */
     handleWalkingOrIdleAnimation() {
         if (this.world?.keyboard.RIGHT || this.world?.keyboard.LEFT) {
-            this.resetIdleState();
-            let index = this.currentImage % this.imageHub.images_walking.length;
-            this.img = this.imageCache[this.imageHub.images_walking[index]];
-            this.currentImage++;
-            this.handleRunningAudio(true);
+            this.playWalkingState();
         } else {
             this.handleIdleState();
         }
+    }
+
+    /**
+     * Updates image and sound when character is walking.
+     */
+    playWalkingState() {
+        this.resetIdleState();
+        let index = this.currentImage % this.imageHub.images_walking.length;
+        this.img = this.imageCache[this.imageHub.images_walking[index]];
+        this.currentImage++;
+        this.handleRunningAudio(true);
     }
 
     /**
@@ -225,12 +266,12 @@ export class Character extends MovableObject {
     }
 
     /**
-     * Stops the snoring sound if active.
+     * Stops the snoring audio effect.
      */
     stopSnoring() {
-        if (this.isSnoringSoundActive && this.world?.audioHub) {
+        this.isSnoringSoundActive = false;
+        if (this.world?.audioHub) {
             this.world.audioHub.stop("character_snoring");
-            this.isSnoringSoundActive = false;
         }
     }
 
@@ -239,40 +280,92 @@ export class Character extends MovableObject {
      * @param {boolean} isMoving - Whether the character is moving.
      */
     handleRunningAudio(isMoving) {
-        if (
-            !this.isAboveGround() &&
-            this.speedY === 0 &&
-            this.world?.audioHub &&
-            isMoving
-        ) {
-            if (!this.isRunningSoundActive) {
-                this.world.audioHub.play("characterRun", 0.6);
-                this.isRunningSoundActive = true;
-            }
-        } else {
+        if (this.canPlayRunSound(isMoving)) {
+            this.world.audioHub.play("characterRun", 0.6);
+            this.isRunningSoundActive = true;
+        } else if (!isMoving) {
             this.world?.audioHub?.stop("characterRun");
             this.isRunningSoundActive = false;
         }
     }
 
     /**
+     * Checks conditions for playing running audio.
+     * @param {boolean} isMoving - Movement flag.
+     * @returns {boolean} True if audio should play.
+     */
+    canPlayRunSound(isMoving) {
+        return (
+            !this.isAboveGround() &&
+            this.speedY === 0 &&
+            this.world?.audioHub &&
+            isMoving &&
+            !this.isRunningSoundActive
+        );
+    }
+
+    /**
      * Manages idle and long idle animations based on inactivity duration.
      */
     handleIdleState() {
+        this.stopRunningAudioOnIdle();
+        this.idleTime += 1000 / 12;
+        this.evaluateIdleDuration();
+    }
+
+    /**
+     * Stops running audio when entering idle state.
+     */
+    stopRunningAudioOnIdle() {
         this.world?.audioHub?.stop("characterRun");
         this.isRunningSoundActive = false;
-        this.idleTime += 1000 / 12;
+    }
 
+    /**
+     * Checks if the game has been won or the boss has been defeated.
+     * @returns {boolean} True if the game is won.
+     */
+    hasGameEnded() {
+        let bossDefeated =
+            this.world &&
+            typeof this.world.isBossDefeated === "function" &&
+            this.world.isBossDefeated();
+        return this.isGameWon || bossDefeated;
+    }
+
+    /**
+     * Evaluates idle duration and triggers corresponding idle/sleep animation.
+     */
+    evaluateIdleDuration() {
+        if (this.hasGameEnded()) {
+            this.stopSnoring();
+            this.resetToStandingPose();
+            return;
+        }
+        this.handleIdleAnimationsByTime();
+    }
+
+    /**
+     * Selects and plays idle animations based on accumulated idle time.
+     */
+    handleIdleAnimationsByTime() {
         if (this.idleTime > 3000) {
             this.playLongIdleAnimation();
         } else if (this.idleTime > 1000) {
             this.stopSnoring();
             this.playIdleAnimation();
         } else {
-            this.stopSnoring();
-            this.loadImage("assets/img/character/walk/stehen.webp");
-            this.currentImage = 0;
+            this.resetToStandingPose();
         }
+    }
+
+    /**
+     * Resets character to standard standing posture.
+     */
+    resetToStandingPose() {
+        this.stopSnoring();
+        this.loadImage("assets/img/character/walk/stehen.webp");
+        this.currentImage = 0;
     }
 
     /**
@@ -285,7 +378,7 @@ export class Character extends MovableObject {
     }
 
     /**
-     * Plays the long idle animation sequence and stays on the last frame until movement resumes.
+     * Plays the long idle animation sequence and triggers snoring audio at the end frame.
      */
     playLongIdleAnimation() {
         let maxIndex = this.imageHub.images_long_idle.length - 1;
@@ -295,10 +388,17 @@ export class Character extends MovableObject {
         this.img = this.imageCache[this.imageHub.images_long_idle[index]];
 
         if (index === maxIndex) {
-            if (this.world?.audioHub && !this.isSnoringSoundActive) {
-                this.world.audioHub.play("character_snoring", 0.5);
-                this.isSnoringSoundActive = true;
-            }
+            this.startSnoringAudioIfNeeded();
+        }
+    }
+
+    /**
+     * Starts snoring audio if not already active.
+     */
+    startSnoringAudioIfNeeded() {
+        if (this.world?.audioHub && !this.isSnoringSoundActive) {
+            this.world.audioHub.play("character_snoring", 0.5);
+            this.isSnoringSoundActive = true;
         }
     }
 

@@ -9,282 +9,232 @@ let isStarting = false;
 let globalAudioHub = new AudioHub();
 
 /**
- * Initializes the canvas element and starts the game world instance.
+ * Initializes canvas and starts the game world.
  */
 function init() {
     canvas = document.getElementById("canvas");
-    if (!canvas) {
-        console.error("Canvas element not found!");
-        return;
-    }
+    if (!canvas) return console.error("Canvas element not found!");
     world = new World(canvas, keyboard);
-
-    if (globalAudioHub.isMuted) {
-        world.audioHub.isMuted = true;
-        for (let key in world.audioHub.sounds) {
-            let soundObj = world.audioHub.sounds[key];
-            if (soundObj && soundObj.file) {
-                soundObj.file.muted = true;
-            }
-        }
-    }
-
+    applyMuteState(world);
     window.world = world;
-
     initTouchControls();
 }
 
 /**
- * Handles keydown events to update the keyboard input state.
- * @param {KeyboardEvent} e - The keyboard event.
+ * Applies global mute state to a game world instance.
+ * @param {World} gameWorld - The game world instance.
  */
-function handleKeyDown(e) {
-    if (e.code == "ArrowLeft" || e.code == "KeyA") keyboard.LEFT = true;
-    if (e.code == "ArrowRight" || e.code == "KeyD") keyboard.RIGHT = true;
-    if (e.code == "ArrowUp" || e.code == "KeyW") keyboard.UP = true;
-    if (e.code == "ArrowDown" || e.code == "KeyS") keyboard.DOWN = true;
-    if (e.code == "Space") keyboard.SPACE = true;
-    if (e.code == "KeyL") keyboard.THROW = true;
+function applyMuteState(gameWorld) {
+    if (!globalAudioHub.isMuted) return;
+    gameWorld.audioHub.isMuted = true;
+    for (let key in gameWorld.audioHub.sounds) {
+        let soundObj = gameWorld.audioHub.sounds[key];
+        if (soundObj?.file) soundObj.file.muted = true;
+    }
 }
 
 /**
- * Handles keyup events to reset the keyboard input state.
- * @param {KeyboardEvent} e - The keyboard event.
+ * Updates keyboard flag states based on event.
+ * @param {KeyboardEvent} e - Keyboard event.
+ * @param {boolean} isPressed - Press state.
  */
-function handleKeyUp(e) {
-    if (e.code == "ArrowLeft" || e.code == "KeyA") keyboard.LEFT = false;
-    if (e.code == "ArrowRight" || e.code == "KeyD") keyboard.RIGHT = false;
-    if (e.code == "ArrowUp" || e.code == "KeyW") keyboard.UP = false;
-    if (e.code == "ArrowDown" || e.code == "KeyS") keyboard.DOWN = false;
-    if (e.code == "Space") keyboard.SPACE = false;
-    if (e.code == "KeyL") keyboard.THROW = false;
+function updateKeyboardState(e, isPressed) {
+    if (e.code === "ArrowLeft" || e.code === "KeyA") keyboard.LEFT = isPressed;
+    if (e.code === "ArrowRight" || e.code === "KeyD")
+        keyboard.RIGHT = isPressed;
+    if (e.code === "ArrowUp" || e.code === "KeyW") keyboard.UP = isPressed;
+    if (e.code === "ArrowDown" || e.code === "KeyS") keyboard.DOWN = isPressed;
+    if (e.code === "Space") keyboard.SPACE = isPressed;
+    if (e.code === "KeyL") keyboard.THROW = isPressed;
 }
 
-window.addEventListener("keydown", handleKeyDown);
-window.addEventListener("keyup", handleKeyUp);
-
-// Initialisiert den Mute-Button UI direkt beim Laden der Seite
-document.addEventListener("DOMContentLoaded", () => {
-    updateMuteButtonUI(globalAudioHub.isMuted);
-});
+window.addEventListener("keydown", (e) => updateKeyboardState(e, true));
+window.addEventListener("keyup", (e) => updateKeyboardState(e, false));
+document.addEventListener("DOMContentLoaded", () =>
+    updateMuteButtonUI(globalAudioHub.isMuted),
+);
 
 /**
- * Initialisiert die Touch-Steuerung für mobile Geräte und Tablets.
+ * Initializes touch control button bindings.
  */
 function initTouchControls() {
-    const bindTouchButton = (elementId, keyName) => {
-        const btn = document.getElementById(elementId);
-        if (!btn) return;
-
-        // Touch Start (Taste drücken)
-        btn.addEventListener(
-            "touchstart",
-            (e) => {
-                e.preventDefault();
-                keyboard[keyName] = true;
-                btn.classList.add("active");
-            },
-            { passive: false },
-        );
-
-        // Touch End / Cancel (Taste loslassen)
-        btn.addEventListener(
-            "touchend",
-            (e) => {
-                e.preventDefault();
-                keyboard[keyName] = false;
-                btn.classList.remove("active");
-            },
-            { passive: false },
-        );
-
-        btn.addEventListener(
-            "touchcancel",
-            (e) => {
-                e.preventDefault();
-                keyboard[keyName] = false;
-                btn.classList.remove("active");
-            },
-            { passive: false },
-        );
-    };
-
-    // Verknüpfe die HTML-Buttons mit den Keyboard-Properties
-    bindTouchButton("btn-left", "LEFT");
-    bindTouchButton("btn-right", "RIGHT");
-    bindTouchButton("btn-jump", "UP"); // Springen (wie Pfeil Oben / W)
-    bindTouchButton("btn-throw", "THROW"); // Werfen (wie Taste L)
+    let buttons = [
+        ["btn-left", "LEFT"],
+        ["btn-right", "RIGHT"],
+        ["btn-jump", "UP"],
+        ["btn-throw", "THROW"],
+    ];
+    buttons.forEach(([id, key]) => bindSingleTouchButton(id, key));
 }
 
 /**
- * Toggles global audio mute state and updates the UI button.
+ * Binds touch listeners to a single button element.
+ * @param {string} id - Element ID.
+ * @param {string} key - Keyboard property key.
+ */
+function bindSingleTouchButton(id, key) {
+    let btn = document.getElementById(id);
+    if (!btn) return;
+    ["touchstart", "touchend", "touchcancel"].forEach((eventType) => {
+        btn.addEventListener(
+            eventType,
+            (e) => handleTouchAction(e, key, btn, eventType),
+            { passive: false },
+        );
+    });
+}
+
+/**
+ * Handles individual touch event actions.
+ * @param {TouchEvent} e - Touch event.
+ * @param {string} key - Key name.
+ * @param {HTMLElement} btn - Button element.
+ * @param {string} eventType - Event type string.
+ */
+function handleTouchAction(e, key, btn, eventType) {
+    e.preventDefault();
+    let isDown = eventType === "touchstart";
+    keyboard[key] = isDown;
+    btn.classList.toggle("active", isDown);
+}
+
+/**
+ * Toggles global mute status.
  */
 window.toggleMute = function () {
-    let isMuted;
-    if (window.world && window.world.audioHub) {
-        isMuted = window.world.audioHub.toggleMute();
-    } else {
-        isMuted = globalAudioHub.toggleMute();
-    }
+    let isMuted = window.world?.audioHub
+        ? window.world.audioHub.toggleMute()
+        : globalAudioHub.toggleMute();
     updateMuteButtonUI(isMuted);
 };
 
+/**
+ * Updates mute button UI elements and icons.
+ * @param {boolean} isMuted - Mute status.
+ */
 function updateMuteButtonUI(isMuted) {
     let btn = document.getElementById("mute-btn");
-    if (!btn) return;
     let svg = document.getElementById("sound-icon");
-    if (isMuted) {
-        btn.classList.add("muted");
-        if (svg) {
-            svg.innerHTML =
-                '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
-        }
-    } else {
-        btn.classList.remove("muted");
-        if (svg) {
-            svg.innerHTML =
-                '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
-        }
-    }
+    if (!btn) return;
+    btn.classList.toggle("muted", isMuted);
+    if (svg) svg.innerHTML = getMuteSvgContent(isMuted);
 }
 
 /**
- * Schaltet den Vollbildmodus für den Game-Container um.
+ * Returns corresponding SVG content for mute button.
+ * @param {boolean} isMuted - Mute status.
+ * @returns {string} SVG inner HTML.
+ */
+function getMuteSvgContent(isMuted) {
+    if (isMuted) {
+        return '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+    }
+    return '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+}
+
+/**
+ * Toggles fullscreen display mode.
  */
 window.toggleFullscreen = function () {
     let container = document.getElementById("game-container");
     let btn = document.getElementById("fullscreen-btn");
-
     if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (container.requestFullscreen) {
-            container.requestFullscreen().catch((err) => {
-                console.error("Error attempting to enable fullscreen:", err);
-            });
-        } else if (container.webkitRequestFullscreen) {
-            container.webkitRequestFullscreen();
-        }
-        if (btn) btn.classList.add("active");
+        requestFullscreenContainer(container, btn);
     } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        }
-        if (btn) btn.classList.remove("active");
+        exitFullscreenContainer(btn);
     }
 };
+
+/**
+ * Requests fullscreen entry.
+ * @param {HTMLElement} container - Container element.
+ * @param {HTMLElement} btn - Button element.
+ */
+function requestFullscreenContainer(container, btn) {
+    if (container.requestFullscreen)
+        container.requestFullscreen().catch((err) => console.error(err));
+    else if (container.webkitRequestFullscreen)
+        container.webkitRequestFullscreen();
+    if (btn) btn.classList.add("active");
+}
+
+/**
+ * Exits fullscreen mode.
+ * @param {HTMLElement} btn - Button element.
+ */
+function exitFullscreenContainer(btn) {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    if (btn) btn.classList.remove("active");
+}
 
 document.addEventListener("fullscreenchange", () => {
     let btn = document.getElementById("fullscreen-btn");
-    if (!btn) return;
-    if (!document.fullscreenElement) {
-        btn.classList.remove("active");
-    } else {
-        btn.classList.add("active");
-    }
+    if (btn) btn.classList.toggle("active", !!document.fullscreenElement);
 });
 
-/**
- * Toggles the visibility of a modal element by its ID.
- * @param {string} modalId - The ID of the modal element.
- */
-window.toggleModal = function (modalId) {
-    let modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.toggle("hidden");
-    }
+window.toggleModal = (modalId) =>
+    document.getElementById(modalId)?.classList.toggle("hidden");
+window.closeModal = (modalId) =>
+    document.getElementById(modalId)?.classList.add("hidden");
+window.closeModalOnOutsideClick = (event, modalId) => {
+    if (event.target === document.getElementById(modalId))
+        window.closeModal(modalId);
 };
 
 /**
- * Closes a specific modal by its ID.
- * @param {string} modalId - The ID of the modal element.
+ * Starts the game session with countdown.
  */
-window.closeModal = function (modalId) {
-    let modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.add("hidden");
-    }
+window.startGame = function () {
+    if (isStarting) return;
+    isStarting = true;
+    let countdownDiv = prepareCountdownDisplay();
+    executeCountdownAudioAndVisuals(countdownDiv);
 };
 
 /**
- * Closes the modal if clicked on the outer background overlay.
- * @param {MouseEvent} event - The click event.
- * @param {string} modalId - The ID of the modal element.
+ * Prepares and returns the countdown display element.
+ * @returns {HTMLElement} Countdown div element.
  */
-window.closeModalOnOutsideClick = function (event, modalId) {
-    let modal = document.getElementById(modalId);
-    if (event.target === modal) {
-        closeModal(modalId);
-    }
-};
-
-/**
- * Hides the start screen and initializes the game session.
- */
-function hideStartScreen() {
+function prepareCountdownDisplay() {
     let startScreen = document.getElementById("start-screen");
-    if (startScreen) {
-        startScreen.style.display = "none";
+    let countdownDiv =
+        document.getElementById("countdown-display") ||
+        document.createElement("div");
+    if (!countdownDiv.id) {
+        countdownDiv.id = "countdown-display";
+        applyCountdownStyles(countdownDiv);
+        startScreen.appendChild(countdownDiv);
     }
-    init();
-}
-
-/**
- * Applies inline Cyberpunk styling to the countdown element.
- * @param {HTMLElement} div - The countdown display element.
- */
-function applyCountdownStyles(div) {
-    div.style.position = "absolute";
-    div.style.top = "50%";
-    div.style.left = "50%";
-    div.style.transform = "translate(-50%, -50%)";
-    div.style.fontSize = "80px";
-    div.style.fontWeight = "bold";
-    div.style.zIndex = "100";
-    div.style.fontFamily = '"Orbitron", sans-serif';
-    div.style.background = "linear-gradient(90deg, #00ffff, #ff0080)";
-    div.style.webkitBackgroundClip = "text";
-    div.style.webkitTextFillColor = "transparent";
-    div.style.textShadow = "0 0 20px rgba(0, 255, 255, 0.4)";
-}
-
-/**
- * Creates and appends the countdown display element to the start screen.
- * @returns {HTMLElement} The created countdown DOM element.
- */
-function createCountdownDisplay() {
-    let startScreen = document.getElementById("start-screen");
-    let countdownDiv = document.createElement("div");
-    countdownDiv.id = "countdown-display";
-    applyCountdownStyles(countdownDiv);
-    startScreen.appendChild(countdownDiv);
     return countdownDiv;
 }
 
 /**
- * Runs the visual countdown steps ("3", "2", "1", "GO!").
- * @param {HTMLElement} countdownDiv - The element displaying the countdown.
+ * Applies styling to countdown element.
+ * @param {HTMLElement} countdownDiv - Element.
  */
-function runCountdownVisuals(countdownDiv) {
-    let steps = ["3", "2", "1", "GO!"];
-    let stepIndex = 0;
-    countdownDiv.innerHTML = steps[stepIndex];
-
-    let countInterval = setInterval(() => {
-        stepIndex++;
-        if (stepIndex < steps.length) {
-            countdownDiv.innerHTML = steps[stepIndex];
-        } else {
-            clearInterval(countInterval);
-        }
-    }, 1000);
+function applyCountdownStyles(countdownDiv) {
+    Object.assign(countdownDiv.style, {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        fontSize: "80px",
+        fontWeight: "bold",
+        zIndex: "100",
+        fontFamily: '"Orbitron", sans-serif',
+        background: "linear-gradient(90deg, #00ffff, #ff0080)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        textShadow: "0 0 20px rgba(0, 255, 255, 0.4)",
+    });
 }
 
 /**
- * Sets up audio playback and schedules visuals with the 350ms sync delay.
- * @param {HTMLElement} countdownDiv - The countdown element.
+ * Runs audio and visuals for countdown sequence.
+ * @param {HTMLElement} countdownDiv - Element.
  */
-function setupAudioPlayback(countdownDiv) {
+function executeCountdownAudioAndVisuals(countdownDiv) {
     let sound = globalAudioHub.sounds["startSoundCountdown"];
     if (!sound?.file || globalAudioHub.isMuted) {
         runCountdownVisuals(countdownDiv);
@@ -299,59 +249,117 @@ function setupAudioPlayback(countdownDiv) {
 }
 
 /**
- * Initiates the game start sequence, hiding the button and starting audio/visual sync.
+ * Runs step-by-step text countdown visuals.
+ * @param {HTMLElement} countdownDiv - Element.
  */
-window.startGame = function () {
-    if (isStarting) return;
-    isStarting = true;
+function runCountdownVisuals(countdownDiv) {
+    let steps = ["3", "2", "1", "GO!"];
+    let i = 0;
+    countdownDiv.innerHTML = steps[i];
+    let interval = setInterval(() => {
+        i++;
+        if (i < steps.length) countdownDiv.innerHTML = steps[i];
+        else clearInterval(interval);
+    }, 1000);
+}
 
-    let startBtn = document.getElementById("start-btn");
-    if (startBtn) startBtn.style.display = "none";
+/**
+ * Hides the start screen overlay and initializes init.
+ */
+function hideStartScreen() {
+    let startScreen = document.getElementById("start-screen");
+    if (startScreen) startScreen.style.display = "none";
+    isStarting = false;
+    init();
+}
 
-    let countdownDiv =
-        document.getElementById("countdown-display") ||
-        createCountdownDisplay();
-    setupAudioPlayback(countdownDiv);
+window.restartGame = function () {
+    hideScreensAndStopWorld();
+    initNewWorldInstance();
+};
+
+window.returnToStartScreen = function () {
+    stopActiveWorldAndAudio();
+    resetUIReturnScreens();
+    window.world = null;
+    isStarting = false;
 };
 
 /**
- * Restarts the game session cleanly without reloading the page.
+ * Stops active world objects and sounds.
  */
+function stopActiveWorldAndAudio() {
+    if (window.world?.stopGame) window.world.stopGame();
+    window.world?.audioHub?.stop("character_snoring");
+    window.world?.character?.stopSnoring?.();
+    stopAllHubSoundsLists();
+}
+
 /**
- * Restarts the game session cleanly without reloading the page.
+ * Stops all sounds across world and global sound hubs.
  */
-window.restartGame = function () {
-    // 1. Overlays verstecken
+function stopAllHubSoundsLists() {
+    [window.world?.audioHub?.sounds, globalAudioHub.sounds].forEach(
+        (sounds) => {
+            if (sounds) {
+                for (let key in sounds) {
+                    let s = sounds[key]?.file;
+                    if (s) {
+                        s.pause();
+                        s.currentTime = 0;
+                    }
+                }
+            }
+        },
+    );
+}
+
+/**
+ * Resets UI elements on return screen.
+ */
+function resetUIReturnScreens() {
     document.getElementById("game-over-screen").classList.add("hidden");
     document.getElementById("win-screen").classList.add("hidden");
+    document.getElementById("countdown-display")?.remove();
+    let startScreen = document.getElementById("start-screen");
+    if (startScreen) startScreen.style.display = "";
+}
 
-    // 2. Alte Welt und deren Sounds stoppen
-    if (window.world && typeof window.world.stopGame === "function") {
-        window.world.stopGame();
-    }
+/**
+ * Hides overlay screens and stops current world.
+ */
+function hideScreensAndStopWorld() {
+    document.getElementById("game-over-screen").classList.add("hidden");
+    document.getElementById("win-screen").classList.add("hidden");
+    if (window.world?.stopGame) window.world.stopGame();
+}
 
-    // 3. Canvas holen & neue Welt erstellen
+/**
+ * Instantiates a fresh game world instance.
+ */
+function initNewWorldInstance() {
     canvas = document.getElementById("canvas");
-    if (!canvas) {
-        console.error("Canvas element not found!");
-        return;
-    }
-
+    if (!canvas) return console.error("Canvas element not found!");
+    keyboard.reset();
     world = new World(canvas, keyboard);
+    window.world = world;
+    applyAudioStateToNewWorld(world);
+}
 
-    // 4. Globalen Mute-Status für die neue Welt übernehmen
+/**
+ * Applies correct mute or background audio state to new world.
+ * @param {World} newWorld - New world instance.
+ */
+function applyAudioStateToNewWorld(newWorld) {
     if (globalAudioHub.isMuted) {
-        world.audioHub.isMuted = true;
-        for (let key in world.audioHub.sounds) {
-            let soundObj = world.audioHub.sounds[key];
-            if (soundObj && soundObj.file) {
-                soundObj.file.muted = true;
-            }
+        newWorld.audioHub.isMuted = true;
+        for (let key in newWorld.audioHub.sounds) {
+            if (newWorld.audioHub.sounds[key]?.file)
+                newWorld.audioHub.sounds[key].file.muted = true;
         }
     } else {
-        // Falls nicht stummgeschaltet, sicherstellen, dass Background von vorne startet
-        world.audioHub.play("background", 0.2);
+        let bg = newWorld.audioHub.sounds["background"]?.file;
+        if (bg) bg.currentTime = 0;
+        newWorld.audioHub.play("background", 0.2);
     }
-
-    window.world = world;
-};
+}

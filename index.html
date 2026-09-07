@@ -61,7 +61,11 @@
                     <h1 class="game-title">ByteRunner</h1>
 
                     <div class="menu-buttons">
-                        <button class="btn" onclick="startGame()">
+                        <button
+                            id="start-btn"
+                            class="btn"
+                            onclick="startGame()"
+                        >
                             Spiel Starten
                         </button>
                         <button
@@ -197,25 +201,35 @@
                     <button id="btn-jump" class="touch-btn">JUMP</button>
                 </div>
             </div>
-        </div>
 
-        <div id="game-over-screen" class="game-overlay hidden">
-            <div class="overlay-content">
-                <h2>SYSTEM FAILURE</h2>
-                <p>CHARACTER TERMINATED</p>
-                <button onclick="restartGame()" class="cyber-btn">
-                    RESTART
-                </button>
+            <div id="game-over-screen" class="game-overlay hidden">
+                <div class="overlay-content">
+                    <h2>SYSTEM FAILURE</h2>
+                    <p>CHARACTER TERMINATED</p>
+                    <div class="overlay-buttons">
+                        <button onclick="restartGame()" class="cyber-btn">
+                            RESTART
+                        </button>
+                        <button onclick="returnToStartScreen()" class="cyber-btn">
+                            HOME
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div id="win-screen" class="game-overlay hidden">
-            <div class="overlay-content">
-                <h2>MISSION ACCOMPLISHED</h2>
-                <p>CYBERPUNK BOSS ELIMINATED</p>
-                <button onclick="restartGame()" class="cyber-btn">
-                    RESTART
-                </button>
+            <div id="win-screen" class="game-overlay hidden">
+                <div class="overlay-content">
+                    <h2>MISSION ACCOMPLISHED</h2>
+                    <p>CYBERPUNK BOSS ELIMINATED</p>
+                    <div class="overlay-buttons">
+                        <button onclick="restartGame()" class="cyber-btn">
+                            RESTART
+                        </button>
+                        <button onclick="returnToStartScreen()" class="cyber-btn">
+                            HOME
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 

@@ -77,19 +77,39 @@ export function processStomp(enemyIndex) {
 export function checkProjectileCollisions() {
     for (let i = this.throwableObjects.length - 1; i >= 0; i--) {
         let disc = this.throwableObjects[i];
-
         this.level.enemies.forEach((enemy, enemyIndex) => {
-            if (isValidProjectileHit.call(this, enemy, disc)) {
-                this.throwableObjects.splice(i, 1); 
-
-                if (this.isEndboss(enemy)) {
-                    inflictBossDamage.call(this, enemy);
-                } else {
-                    this.audioHub.play("enemiesDead", 0.5);
-                    this.level.enemies.splice(enemyIndex, 1);
-                }
-            }
+            handleSingleProjectileCollision.call(
+                this,
+                enemy,
+                enemyIndex,
+                disc,
+                i,
+            );
         });
+    }
+}
+
+/**
+ * Handles a potential collision between a specific projectile and an enemy.
+ * @param {Object} enemy - The enemy object.
+ * @param {number} enemyIndex - Index of the enemy.
+ * @param {Object} disc - The projectile object.
+ * @param {number} discIndex - Index of the projectile.
+ */
+export function handleSingleProjectileCollision(
+    enemy,
+    enemyIndex,
+    disc,
+    discIndex,
+) {
+    if (isValidProjectileHit.call(this, enemy, disc)) {
+        this.throwableObjects.splice(discIndex, 1);
+        if (this.isEndboss(enemy)) {
+            inflictBossDamage.call(this, enemy);
+        } else {
+            this.audioHub.play("enemiesDead", 0.5);
+            this.level.enemies.splice(enemyIndex, 1);
+        }
     }
 }
 
@@ -100,7 +120,9 @@ export function checkProjectileCollisions() {
  * @returns {boolean} True if valid hit.
  */
 export function isValidProjectileHit(enemy, disc) {
-    let isAlive = this.isEndboss(enemy) ? (!enemy.isDead() && enemy.isAwake) : true;
+    let isAlive = this.isEndboss(enemy)
+        ? !enemy.isDead() && enemy.isAwake
+        : true;
     return isAlive && disc.isColliding(enemy);
 }
 

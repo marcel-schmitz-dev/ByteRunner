@@ -4,7 +4,6 @@
 class MyAudio {
     /**
      * Creates and loads an audio resource.
-     *
      * @param {string} file - The path or URL of the audio file.
      */
     constructor(file) {
@@ -23,7 +22,15 @@ export class AudioHub {
      */
     constructor() {
         this.isMuted = localStorage.getItem("byteRunner_muted") === "true";
+        this.initializeSounds();
+        this.configureLoopingSounds();
+        this.applyMuteStateToAll();
+    }
 
+    /**
+     * Initializes all game sound instances.
+     */
+    initializeSounds() {
         this.sounds = {
             background: new MyAudio("assets/audio/background.mp3"),
             bossDead: new MyAudio("assets/audio/boss_dead.mp3"),
@@ -49,52 +56,100 @@ export class AudioHub {
             startSoundCountdown: new MyAudio(
                 "assets/audio/start_sound_countdown.mp3",
             ),
+            youWin: new MyAudio("assets/audio/you_win.mp3"),
         };
+    }
 
-        this.sounds.background.file.loop = true;
-        this.sounds.bossLaufSound.file.loop = true;
-        this.sounds.characterRun.file.loop = true;
-        this.sounds.bossFightSound.file.loop = true;
-        this.sounds.character_snoring.file.loop = true;
+    /**
+     * Configures looping behavior for specific ambient and movement sounds.
+     */
+    configureLoopingSounds() {
+        this.setSoundLoop("background", true);
+        this.setSoundLoop("bossLaufSound", true);
+        this.setSoundLoop("characterRun", true);
+        this.setSoundLoop("bossFightSound", true);
+        this.setSoundLoop("character_snoring", true);
+    }
 
-        for (let key in this.sounds) {
-            let soundObj = this.sounds[key];
-            if (soundObj && soundObj.file) {
-                soundObj.file.muted = this.isMuted;
-            }
+    /**
+     * Enables or disables looping for a specific sound key.
+     * @param {string} soundKey - The name of the sound.
+     * @param {boolean} isLooping - Loop state.
+     */
+    setSoundLoop(soundKey, isLooping) {
+        if (this.sounds[soundKey]?.file) {
+            this.sounds[soundKey].file.loop = isLooping;
         }
     }
 
+    /**
+     * Applies the current mute state across all registered sounds.
+     */
+    applyMuteStateToAll() {
+        for (let key in this.sounds) {
+            this.updateSoundMuteState(this.sounds[key]);
+        }
+    }
+
+    /**
+     * Updates mute property on an individual sound object.
+     * @param {MyAudio} soundObj - The audio object.
+     */
+    updateSoundMuteState(soundObj) {
+        if (soundObj?.file) {
+            soundObj.file.muted = this.isMuted;
+        }
+    }
+
+    /**
+     * Plays a specific sound by name with a given volume.
+     * @param {string} soundName - Name of the sound key.
+     * @param {number} [volume=1.0] - Volume level between 0.0 and 1.0.
+     */
     play(soundName, volume = 1.0) {
         if (this.isMuted) return;
         let soundObj = this.sounds[soundName];
         if (soundObj) {
-            soundObj.file.currentTime = 0;
-            soundObj.file.volume = volume;
-            soundObj.file.play().catch((e) => {
-                console.log("Audio play blocked or error:", e);
-            });
+            this.executeSoundPlayback(soundObj, volume);
         }
     }
 
+    /**
+     * Executes the audio playback with time reset and error handling.
+     * @param {MyAudio} soundObj - The audio object.
+     * @param {number} volume - Volume level.
+     */
+    executeSoundPlayback(soundObj, volume) {
+        soundObj.file.currentTime = 0;
+        soundObj.file.volume = volume;
+        soundObj.file.play().catch((e) => {
+            if (e.name !== "AbortError") {
+                console.log("Audio play blocked or error:", e);
+            }
+        });
+    }
+
+    /**
+     * Pauses and resets a specific sound.
+     * @param {string} soundName - Name of the sound key.
+     */
     stop(soundName) {
         let soundObj = this.sounds[soundName];
-        if (soundObj) {
+        if (soundObj?.file) {
             soundObj.file.pause();
             soundObj.file.currentTime = 0;
+            soundObj.file.loop = false;
         }
     }
 
+    /**
+     * Toggles the global mute state and saves it to local storage.
+     * @returns {boolean} The new mute state.
+     */
     toggleMute() {
         this.isMuted = !this.isMuted;
         localStorage.setItem("byteRunner_muted", this.isMuted);
-
-        for (let key in this.sounds) {
-            let soundObj = this.sounds[key];
-            if (soundObj && soundObj.file) {
-                soundObj.file.muted = this.isMuted;
-            }
-        }
+        this.applyMuteStateToAll();
         return this.isMuted;
     }
 }
