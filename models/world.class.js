@@ -91,13 +91,16 @@ export class World {
      * Executes one tick of the main game loop.
      */
     runLoopTick() {
-        if (!this.isGameRunning) return;
-        if (this.handleBossDefeatState()) return;
-        this.checkCollisions();
-        this.checkBossAwakening();
-        this.checkCollectibles();
-        this.handleBossBehavior();
-    }
+    if (!this.isGameRunning) return;
+    if (this.handleBossDefeatState()) return;
+
+    if (this.character.isDead()) return;
+
+    this.checkCollisions();
+    this.checkBossAwakening();
+    this.checkCollectibles();
+    this.handleBossBehavior();
+}
 
     /**
      * Handles boss defeat checks and state changes.
@@ -135,12 +138,13 @@ export class World {
      * Sets character state to game won.
      */
     setWinCharacterState() {
-        if (!this.character) return;
-        this.character.isGameWon = true;
-        if (typeof this.character.stopSnoring === "function") {
-            this.character.stopSnoring();
-        }
+    if (!this.character) return;
+    this.character.isGameWon = true;
+    this.character.speedX = 0;
+    if (typeof this.character.stopSnoring === "function") {
+        this.character.stopSnoring();
     }
+}
 
     /**
      * Stops the entire game.

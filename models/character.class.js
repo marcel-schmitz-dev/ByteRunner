@@ -91,34 +91,37 @@ export class Character extends MovableObject {
      * Moves the character to the right if input and boundaries allow.
      */
     handleRightMovement() {
-        if (
-            this.world?.keyboard.RIGHT &&
-            this.x < this.world.level.level_end_x
-        ) {
-            this.x += this.speed;
-            this.otherDirection = false;
-        }
+    if (this.isDead() || this.hasGameEnded()) return;
+    if (
+        this.world?.keyboard.RIGHT &&
+        this.x < this.world.level.level_end_x
+    ) {
+        this.x += this.speed;
+        this.otherDirection = false;
     }
+}
 
     /**
      * Moves the character to the left if input and boundaries allow.
      */
     handleLeftMovement() {
-        if (this.world?.keyboard.LEFT && this.x > 0) {
-            this.x -= this.speed;
-            this.otherDirection = true;
-        }
+    if (this.isDead() || this.hasGameEnded()) return;
+    if (this.world?.keyboard.LEFT && this.x > 0) {
+        this.x -= this.speed;
+        this.otherDirection = true;
     }
+}
 
     handleVerticalMovement() {
-        if (
-            this.world?.keyboard.SPACE &&
-            !this.isAboveGround() &&
-            this.speedY === 0
-        ) {
-            this.jump();
-        }
+    if (this.isDead() || this.hasGameEnded()) return;
+    if (
+        this.world?.keyboard.SPACE &&
+        !this.isAboveGround() &&
+        this.speedY === 0
+    ) {
+        this.jump();
     }
+}
 
     /**
      * Updates the camera position relative to the character's coordinate.
@@ -389,11 +392,12 @@ export class Character extends MovableObject {
      * Makes the character jump and plays the jump sound effect.
      */
     jump() {
-        this.speedY = 25;
-        this.idleTime = 0; // Reset idle timer on jump
-        this.stopSnoring();
-        if (this.world?.audioHub) {
-            this.world.audioHub.play("characterJump", 0.4);
-        }
+    if (this.isDead() || this.hasGameEnded()) return;
+    this.speedY = 25;
+    this.idleTime = 0; 
+    this.stopSnoring();
+    if (this.world?.audioHub) {
+        this.world.audioHub.play("characterJump", 0.4);
     }
+}
 }
