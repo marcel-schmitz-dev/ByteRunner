@@ -103,7 +103,7 @@ body {
     -ms-user-select: none;
     -webkit-user-drag: none;
     outline: none;
-    touch-action: none;
+    touch-action: manipulation;
     -webkit-touch-callout: none;
     cursor: pointer;
     transition: all 0.15s ease;
